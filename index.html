@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Arte Style Ponto</title>
+<!-- PWA: instalar na tela inicial como app (icone Arte Style, tela cheia) -->
+<meta name="theme-color" content="#0d0d0d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Arte Style">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lima:#6FD11A; --lima-esc:#59ad12; --preto:#0d0d0d; --preto2:#141414;
+    --card:#191919; --card2:#1f1f1f; --linha:#2a2a2a; --branco:#ffffff;
+    --cinza:#9aa0a6; --cinza2:#6b7075; --vermelho:#f1516f; --amarelo:#f1c40f;
+    --glow:0 0 40px rgba(111,209,26,.28);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(120% 80% at 50% -10%, #1c1c1c 0%, var(--preto) 55%, #070707 100%);
+    color:var(--branco); overflow:hidden; user-select:none; -webkit-user-select:none;
+  }
+  h1,h2,h3,.font-title{font-family:'Sora','Inter',sans-serif}
+  #app{position:relative;max-width:480px;margin:0 auto;height:100dvh;height:100vh;overflow:hidden}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transform:translateX(24px);
+    pointer-events:none;transition:opacity .28s ease,transform .28s ease;padding:0 20px;overflow-y:auto;overflow-x:hidden}
+  .screen.active{opacity:1;transform:none;pointer-events:auto}
+  .screen::-webkit-scrollbar{width:0}
+  .pad-safe{padding-top:max(20px,env(safe-area-inset-top))}
+  /* fundo verde lima + preto SÓ na aba de início */
+  #scr-home{background:
+    radial-gradient(rgba(111,209,26,.055) 1px, transparent 1.6px) 0 0 / 20px 20px,   /* textura perfurada (igual a logo) */
+    radial-gradient(120% 55% at 8% -4%, rgba(111,209,26,.5), rgba(111,209,26,.08) 42%, transparent 64%),
+    radial-gradient(90% 45% at 100% 102%, rgba(111,209,26,.16), transparent 55%),
+    linear-gradient(165deg, #12220b 0%, #0c1207 26%, #090909 58%, #050505 100%)}
+
+  /* ---------- Cabeçalho topo ---------- */
+  .brand{display:flex;align-items:center;gap:12px;padding:22px 2px 12px;min-width:0}
+  .brand .logo{width:46px;height:46px;border-radius:13px;overflow:hidden;box-shadow:var(--glow);flex:none;background:#0d0d0d}
+  .brand .logo img{width:100%;height:100%;object-fit:cover;display:block}
+  .brand>.id-txt{min-width:0;flex:1 1 auto;overflow:hidden}
+  .brand .nome{font-family:'Sora';font-weight:800;font-size:17px;letter-spacing:.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand .sub{font-size:11.5px;color:var(--cinza);letter-spacing:.3px;margin-top:2px;white-space:nowrap}
+  .relogio{margin-left:auto;text-align:right;flex:none;padding-left:8px}
+  .relogio .hora{font-family:'Sora';font-weight:700;font-size:19px;color:var(--lima);letter-spacing:.5px;font-variant-numeric:tabular-nums}
+  .relogio .data{font-size:11px;color:var(--cinza);text-transform:capitalize;white-space:nowrap}
+
+  /* ---------- Home: hero + equipe + lista ---------- */
+  .hero{position:relative;overflow:hidden;display:flex;align-items:center;gap:15px;margin:8px 0 20px;padding:16px 15px;
+    border-radius:20px;border:1px solid rgba(111,209,26,.35);
+    background:linear-gradient(135deg,rgba(111,209,26,.12),rgba(20,20,20,.3)),#141414;box-shadow:var(--glow)}
+  .hero-fp{width:60px;height:60px;border-radius:16px;flex:none;display:grid;place-items:center;color:var(--lima);
+    background:rgba(111,209,26,.10);box-shadow:inset 0 0 0 1.5px rgba(111,209,26,.5)}
+  .hero-fp svg{width:32px;height:32px}
+  .hero-tx{flex:1;min-width:0;z-index:1;padding-right:26px}
+  .hero-t{font-family:'Sora';font-weight:800;font-size:20px;line-height:1.15;white-space:nowrap}
+  .hero-s{color:var(--cinza);font-size:12px;margin-top:2px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hero-dots{position:absolute;right:30px;top:0;bottom:0;width:80px;opacity:.5;pointer-events:none;
+    background:radial-gradient(rgba(111,209,26,.5) 1px,transparent 1.6px) 0 0/12px 12px;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 80%);mask-image:linear-gradient(90deg,transparent,#000 80%)}
+  .hero-arw{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:22px;height:22px;color:var(--lima);z-index:1}
+  .equipe-head{display:flex;align-items:center;gap:12px;margin:14px 2px 15px}
+  .equipe-head .eh-ic{width:44px;height:44px;border-radius:13px;flex:none;display:grid;place-items:center;color:var(--lima);border:1px solid var(--linha);background:var(--card)}
+  .equipe-head .eh-ic svg{width:22px;height:22px}
+  .equipe-head .eh-tx{flex:1;min-width:0}
+  .equipe-head .eh-tx b{font-family:'Sora';font-weight:700;font-size:18px;display:block;line-height:1.15}
+  .equipe-head .eh-tx small{color:var(--cinza2);font-size:12px}
+  .equipe-head .eh-chip{flex:none;font-size:12px;color:var(--cinza);background:var(--card);border:1px solid var(--linha);border-radius:20px;padding:6px 12px;white-space:nowrap}
+  .grade{display:flex;flex-direction:column;gap:11px;padding-bottom:6px}
+  .func{background:linear-gradient(160deg,#1b1b1b,#151515);border:1px solid var(--linha);border-radius:18px;padding:12px 14px;
+    display:flex;align-items:center;gap:14px;cursor:pointer;position:relative;
+    box-shadow:0 4px 14px rgba(0,0,0,.3);transition:transform .12s ease,border-color .2s ease,background .2s ease}
+  .func:active{transform:scale(.985);border-color:rgba(111,209,26,.55);background:linear-gradient(160deg,#212a18,#161616)}
+  .avatar{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;overflow:hidden;flex:none;position:relative;
+    font-family:'Sora';font-weight:700;font-size:20px;background:#151515;border:2.5px solid var(--lima);color:var(--lima)}
+  .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+  .func .fnome{font-weight:600;font-size:16px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .func .fchev{width:20px;height:20px;color:var(--cinza2);flex:none;stroke-width:2.4}
+  .home-foot{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--cinza2);font-size:12.5px;padding:16px 0 26px}
+  .home-foot svg{width:20px;height:20px;color:var(--lima);flex:none}
+  .home-foot b{color:var(--lima);font-weight:700}
+  .stag{flex:none;font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;display:inline-flex;align-items:center;gap:6px;letter-spacing:.2px}
+  .stag i{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;box-shadow:0 0 8px currentColor}
+  .st-fora{color:#8b9096;background:rgba(139,144,150,.14)}
+  .st-trab{color:var(--lima);background:rgba(111,209,26,.14)}
+  .st-int{color:#f1c40f;background:rgba(241,196,15,.14)}
+  .st-volta{color:#34b3f1;background:rgba(52,179,241,.14)}
+  .st-fim{color:#9aa0a6;background:rgba(154,160,166,.1)}
+
+  /* ---------- Botão voltar + header interno ---------- */
+  .top{display:flex;align-items:center;gap:14px;padding:22px 2px 10px}
+  .back{width:42px;height:42px;border-radius:13px;background:var(--card);border:1px solid var(--linha);
+    display:grid;place-items:center;cursor:pointer;flex:none}
+  .back:active{background:var(--card2)}
+  .back svg{width:20px;height:20px;stroke:var(--branco)}
+  .top .h-nome{font-family:'Sora';font-weight:700;font-size:19px;color:var(--lima)}
+  .top .h-sub{font-size:12px;color:var(--cinza)}
+  #scr-func .h-nome{color:var(--branco)}
+  .top .avatar-mini{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;overflow:hidden;
+    font-family:'Sora';font-weight:700;font-size:15px;background:#151515;border:2px solid var(--lima);color:var(--lima);flex:none}
+  .top .avatar-mini img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+
+  /* admin */
+  .admin-btn{width:36px;height:36px;border-radius:11px;background:var(--card);border:1px solid var(--linha);color:var(--cinza2);
+    display:grid;place-items:center;cursor:pointer;flex:none;margin-left:8px;transition:.2s}
+  .admin-btn:active{color:var(--lima);border-color:var(--lima)}
+  .admin-btn svg{width:19px;height:19px}
+  .admin-login-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:0 24px 40px;text-align:center}
+  .admin-shield{width:84px;height:84px;border-radius:50%;background:rgba(111,209,26,.12);display:grid;place-items:center;color:var(--lima);margin-bottom:4px;box-shadow:var(--glow)}
+  .admin-shield svg{width:42px;height:42px}
+  .admin-pass{width:100%;max-width:280px;background:var(--card);border:1.5px solid var(--linha);border-radius:16px;padding:16px;
+    color:#fff;font-family:'Sora';font-weight:700;font-size:22px;text-align:center;letter-spacing:4px;outline:none;transition:.2s}
+  .admin-pass:focus{border-color:var(--lima)}
+  .admin-inp{width:100%;max-width:300px;background:var(--card);border:1.5px solid var(--linha);border-radius:14px;padding:15px 16px;
+    color:#fff;font-family:'Inter';font-size:16px;outline:none;transition:.2s}
+  .admin-inp:focus{border-color:var(--lima)}
+  .pass-wrap{position:relative;width:100%;max-width:300px;display:flex}
+  .pass-wrap .admin-inp,.pass-wrap .cfg-inp{max-width:none;flex:1;padding-right:48px}
+  .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:none;background:transparent;color:var(--cinza2);display:grid;place-items:center;cursor:pointer}
+  .eye:active,.eye.on{color:var(--lima)}
+  .eye svg{width:21px;height:21px}
+  .login-sub{color:var(--cinza);font-size:14px}
+  .login-erro{color:var(--vermelho);font-size:13px;min-height:18px;font-weight:600}
+  .admin-sec{font-size:11.5px;color:var(--lima);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin:14px 2px 12px}
+  .admin-novo{display:none;flex-direction:column;gap:9px;background:var(--card);border:1px solid rgba(111,209,26,.4);border-radius:16px;padding:14px;margin-bottom:12px}
+  .admin-novo.show{display:flex}
+  .admin-novo input{width:100%;background:#0d0d0d;border:1.5px solid var(--linha);border-radius:12px;padding:13px;color:#fff;font-family:'Inter';font-size:15px;outline:none}
+  .admin-novo input:focus{border-color:var(--lima)}
+  .admin-novo-btns{display:flex;gap:10px}
+  .admin-novo-btns .btn{height:46px;font-size:15px;flex:1}
+  .admin-list{display:flex;flex-direction:column;gap:9px;padding-bottom:16px}
+  .admin-row{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--linha);border-radius:15px;padding:8px 9px}
+  .admin-row .an-nome{flex:1;min-width:0;background:#0d0d0d;border:1.5px solid var(--linha);border-radius:10px;padding:9px;color:#fff;font-family:'Inter';font-weight:600;font-size:13.5px;outline:none}
+  .admin-row .an-pin{width:52px;background:#0d0d0d;border:1.5px solid var(--linha);border-radius:10px;padding:9px 2px;color:#fff;font-family:'Sora';font-weight:700;font-size:14px;text-align:center;outline:none}
+  .admin-row .an-nome:focus,.admin-row .an-pin:focus{border-color:var(--lima)}
+  .admin-row .save,.admin-row .rm,.admin-row .bio{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:none;border:none}
+  .admin-row .save,.admin-row .rm,.admin-row .bio{transition:filter .1s} .admin-row .save:active,.admin-row .rm:active,.admin-row .bio:active{filter:brightness(.85)}
+  .admin-row .save{background:var(--lima)} .admin-row .save svg{width:18px;height:18px;stroke:#0d0d0d;fill:none}
+  .admin-row .rm{background:rgba(241,81,111,.14)} .admin-row .rm svg{width:17px;height:17px;stroke:var(--vermelho);fill:none}
+  .admin-row .ar-av{width:38px;height:38px;border-radius:50%;flex:none;overflow:hidden;display:grid;place-items:center;padding:0;
+    background:#151515;border:2px solid var(--lima);color:var(--lima);font-family:'Sora';font-weight:700;font-size:13px;cursor:pointer}
+  .admin-row .ar-av img{width:100%;height:100%;object-fit:cover;display:block}
+  .admin-row .ar-av:active{filter:brightness(.85)}
+  .admin-row .bio{border:1px solid rgba(111,209,26,.28);background:rgba(111,209,26,.06);color:#a7b0a0}
+  .admin-row .bio.on{color:var(--lima);border-color:rgba(111,209,26,.6);background:rgba(111,209,26,.16)}
+  .admin-row .bio svg{width:20px;height:20px}
+  .admin-soon{font-size:12px;color:var(--cinza2);text-align:center;margin:6px 2px 24px;line-height:1.5}
+  /* menu admin */
+  .amenu-list{display:flex;flex-direction:column;gap:11px;padding:6px 0 24px}
+  .amenu{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:15px 16px;cursor:pointer;text-align:left;transition:.15s}
+  .amenu:active{border-color:var(--lima);background:var(--card2)}
+  .amenu .ai{width:46px;height:46px;border-radius:13px;background:rgba(111,209,26,.12);display:grid;place-items:center;color:var(--lima);flex:none}
+  .amenu .ai svg{width:23px;height:23px}
+  .amenu .atx{display:flex;flex-direction:column;flex:1;min-width:0}
+  .amenu .atx b{font-family:'Sora';font-size:16px;font-weight:700;color:var(--lima)}
+  .amenu .atx small{font-size:12px;color:var(--cinza2);margin-top:2px}
+  .amenu .achev{width:20px;height:20px;color:var(--cinza2);flex:none;stroke-width:2.4}
+  .amenu .abadge{min-width:24px;height:24px;border-radius:12px;background:var(--vermelho);color:#fff;font-size:12px;font-weight:700;display:none;place-items:center;padding:0 7px;flex:none}
+  .amenu .abadge.show{display:grid}
+  /* correções */
+  .corr-list{display:flex;flex-direction:column;gap:11px;padding:6px 0 24px}
+  .corr-card{background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:14px}
+  .corr-card .ch{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+  .corr-card .ch .cn{font-weight:700;font-size:15px;flex:1}
+  .corr-card .ch .cd{font-size:12px;color:var(--cinza2)}
+  .corr-card .cinfo{font-size:13.5px;color:#e8e8e8;line-height:1.6}
+  .corr-card .cinfo b{color:var(--lima)}
+  .corr-card .cmot{font-size:13px;color:var(--cinza);margin-top:6px;background:#0d0d0d;border-radius:10px;padding:9px 11px}
+  .corr-card .clink{display:inline-flex;align-items:center;gap:5px;color:#34b3f1;font-size:12.5px;font-weight:600;margin-top:8px;text-decoration:none}
+  .corr-card .clink svg{width:14px;height:14px}
+  .corr-card .cbtns{display:flex;gap:10px;margin-top:12px}
+  .corr-card .cbtns button{flex:1;height:44px;border:none;border-radius:12px;font-family:'Sora';font-weight:700;font-size:14.5px;cursor:pointer}
+  .corr-card .capr{background:var(--lima);color:#0d0d0d}
+  .corr-card .crep{background:rgba(241,81,111,.15);color:var(--vermelho)}
+  .corr-vazio{text-align:center;color:var(--cinza2);padding:46px 20px;font-size:14px}
+  .corr-vazio .big{font-size:38px;margin-bottom:10px;opacity:.5}
+  /* relatório (lista) */
+  .sneg{color:var(--vermelho)!important} .spos{color:var(--lima)!important} .szero{color:var(--cinza)!important}
+  .rel-list{display:flex;flex-direction:column;gap:10px;padding:6px 0 24px}
+  .rel-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1px solid var(--linha);border-radius:15px;padding:14px 14px;cursor:pointer;color:inherit;font-family:inherit}
+  .rel-card:active{border-color:var(--lima);background:var(--card2)}
+  .rel-card .rl-nome{font-weight:700;font-size:15px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rel-card .rl-mid{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none}
+  .rel-card .rl-h{font-family:'Sora';font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+  .rel-card .rl-d{font-size:11px;color:var(--cinza2)}
+  .rel-card .rl-saldo{font-family:'Sora';font-weight:700;font-size:14px;min-width:56px;text-align:right;font-variant-numeric:tabular-nums}
+  .rel-card .rl-arw{width:18px;height:18px;color:var(--cinza2);flex:none}
+  /* relatório (detalhe) */
+  .reld-kpis{display:flex;gap:9px;margin:2px 0 14px}
+  .reld-kpis .rk{flex:1;background:var(--card);border:1px solid var(--linha);border-radius:14px;padding:12px 8px;text-align:center}
+  .reld-kpis .rk-v{display:block;font-family:'Sora';font-weight:700;font-size:19px;font-variant-numeric:tabular-nums}
+  .reld-kpis .rk-l{display:block;font-size:11px;color:var(--cinza2);margin-top:3px}
+  .reld-wrap{overflow-x:auto;padding-bottom:24px;-webkit-overflow-scrolling:touch}
+  .reld-tab{width:100%;border-collapse:collapse;font-size:12.5px;min-width:430px}
+  .reld-tab th{font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--lima);font-weight:700;text-align:center;padding:8px 6px;border-bottom:1px solid var(--linha)}
+  .reld-tab td{text-align:center;padding:9px 6px;border-bottom:1px solid rgba(255,255,255,.05);color:#e8e8e8;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .reld-tab .td-d{text-align:left} .reld-tab .td-d b{display:block;font-size:12.5px} .reld-tab .td-d small{color:var(--cinza2);font-size:10.5px}
+  .reld-tab .td-h{font-weight:700;font-family:'Sora'}
+  /* configurações */
+  .cfg-sec{font-size:11.5px;color:var(--lima);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin:16px 2px 9px}
+  .cfg-card{background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:11px}
+  .cfg-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .cfg-row span{font-size:14px;color:#e8e8e8}
+  .cfg-hm{width:88px;height:44px;text-align:center;background:#0d0d0d;border:1px solid var(--linha);border-radius:11px;color:#fff;font-family:'Sora';font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+  .cfg-inp{width:100%;height:46px;background:#0d0d0d;border:1px solid var(--linha);border-radius:11px;color:#fff;font-size:15px;padding:0 14px}
+  .cfg-hm:focus,.cfg-inp:focus{border-color:var(--lima);outline:none}
+  .cfg-hint{font-size:12px;color:var(--cinza2);line-height:1.5}
+  .cfg-erro{font-size:12.5px;color:var(--vermelho);font-weight:600;min-height:16px}
+  .cfg-disp{font-size:12.5px;color:#e8e8e8;background:#0d0d0d;border-radius:10px;padding:10px 12px;word-break:break-all;font-family:'Sora'}
+  .cfg-danger{color:var(--vermelho);border-color:rgba(241,81,111,.4)}
+  .cfg-userhd{display:flex;align-items:center;gap:13px}
+  .cfg-uav{width:52px;height:52px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;background:#151515;border:2.5px solid var(--lima);color:var(--lima);font-family:'Sora';font-weight:700;font-size:19px}
+  .cfg-uav img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+  .cfg-uinfo{flex:1;min-width:0}
+  .cfg-uinfo small{display:block;font-size:11px;color:var(--cinza2)}
+  .cfg-uinfo b{font-family:'Sora';font-weight:700;font-size:16px;word-break:break-all}
+  .cfg-fotobtn{flex:none;display:inline-flex;align-items:center;gap:6px;background:rgba(111,209,26,.12);border:1px solid rgba(111,209,26,.4);color:var(--lima);border-radius:11px;padding:9px 12px;font-family:'Sora';font-weight:600;font-size:13px;cursor:pointer}
+  .cfg-fotobtn:active{filter:brightness(.9)} .cfg-fotobtn svg{width:16px;height:16px}
+  .cfg-lbl{font-size:12.5px;color:var(--cinza);font-weight:600}
+  .cfg-div{height:1px;background:var(--linha);margin:3px 0}
+  /* feriados */
+  .fer-add{display:flex;flex-direction:column;gap:10px}
+  .fer-inp{width:100%;height:46px;background:#0d0d0d;border:1px solid var(--linha);border-radius:11px;color:#fff;font-size:15px;padding:0 14px}
+  .fer-inp:focus{border-color:var(--lima);outline:none}
+  .fer-date{font-family:'Sora';font-variant-numeric:tabular-nums}
+  .fer-date::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.55;cursor:pointer}
+  .fer-list{display:flex;flex-direction:column;gap:9px;padding-bottom:24px}
+  .fer-row{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--linha);border-radius:13px;padding:12px 13px}
+  .fer-row .fr-data{font-family:'Sora';font-weight:700;font-size:14px;color:var(--lima);flex:none;font-variant-numeric:tabular-nums}
+  .fer-row .fr-nome{flex:1;font-size:14px;color:#e8e8e8;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fer-row .fr-rm{width:38px;height:38px;flex:none;border:none;border-radius:10px;background:rgba(241,81,111,.14);color:var(--vermelho);display:grid;place-items:center;cursor:pointer}
+  .fer-row .fr-rm svg{width:17px;height:17px;fill:none}
+
+  /* ---------- PIN ---------- */
+  .pin-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-bottom:20px}
+  .pin-avatar{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;overflow:hidden;
+    font-family:'Sora';font-weight:700;font-size:34px;background:#151515;border:3px solid var(--lima);color:var(--lima);margin-bottom:6px;box-shadow:0 0 26px rgba(111,209,26,.25)}
+  .pin-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+  .pin-nome{font-family:'Sora';font-weight:700;font-size:22px}
+  .pin-info{color:var(--cinza);font-size:13.5px;margin-bottom:18px}
+  .dots{display:flex;gap:16px;margin-bottom:26px;min-height:18px}
+  .dot{width:16px;height:16px;border-radius:50%;background:transparent;border:2px solid #3a3a3a;transition:.15s}
+  .dot.on{background:var(--lima);border-color:var(--lima);box-shadow:0 0 12px rgba(111,209,26,.6)}
+  .dot.err{background:var(--vermelho);border-color:var(--vermelho)}
+  .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:300px}
+  .key{height:66px;border-radius:18px;background:var(--card);border:1px solid var(--linha);
+    font-family:'Sora';font-weight:600;font-size:26px;color:var(--branco);cursor:pointer;
+    display:grid;place-items:center;transition:transform .1s ease,background .15s}
+  .key:active{transform:scale(.94);background:var(--lima);color:#0d0d0d}
+  .key.acao{background:transparent;border-color:transparent;font-size:15px;color:var(--cinza)}
+  .key.acao:active{background:var(--card2);color:var(--branco)}
+  .key svg{width:26px;height:26px;stroke:var(--branco)}
+
+  /* ---------- Jornada ---------- */
+  .cron-card{background:linear-gradient(135deg,#1c1c1c,#141414);border:1px solid var(--linha);
+    border-radius:22px;padding:20px;margin:6px 0 18px;text-align:center;position:relative;overflow:hidden}
+  .cron-card .badge-int{position:absolute;top:14px;right:14px;font-size:11px;font-weight:600;color:var(--amarelo);
+    background:rgba(241,196,15,.12);border:1px solid rgba(241,196,15,.3);padding:4px 10px;border-radius:20px;display:none}
+  .cron-card.intervalo .badge-int{display:block}
+  .cron-lbl{font-size:12.5px;color:var(--cinza);letter-spacing:.4px;text-transform:uppercase}
+  .cron-time{font-family:'Sora';font-weight:800;font-size:46px;letter-spacing:1px;color:var(--lima);
+    font-variant-numeric:tabular-nums;line-height:1.15;margin-top:4px}
+  .cron-card.intervalo .cron-time{color:var(--amarelo)}
+  .cron-sub{font-size:12px;color:var(--cinza2);margin-top:2px}
+
+  .passos{display:flex;flex-direction:column;gap:11px;padding-bottom:14px}
+  .passo{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--linha);
+    border-radius:16px;padding:14px 16px;transition:.2s}
+  .passo .ic{width:38px;height:38px;border-radius:11px;background:#242424;display:grid;place-items:center;flex:none;color:var(--cinza)}
+  .passo .ic svg{width:20px;height:20px}
+  .passo .txt{flex:1}
+  .passo .p-nome{font-weight:600;font-size:14.5px}
+  .passo .p-est{font-size:11.5px;color:var(--cinza2);margin-top:1px}
+  .passo .p-hora{font-family:'Sora';font-weight:700;font-size:15px;color:var(--cinza)}
+  .passo.feito{border-color:rgba(111,209,26,.35)}
+  .passo.feito .ic{background:rgba(111,209,26,.15);color:var(--lima)}
+  .passo.atual .ic{color:var(--lima)}
+  .passo.feito .p-hora{color:var(--lima)}
+  .passo.futuro{opacity:.5}
+  .passo.atual{border-color:var(--lima);background:linear-gradient(135deg,rgba(111,209,26,.12),var(--card));box-shadow:var(--glow)}
+
+  .btn{width:100%;height:60px;border:none;border-radius:18px;font-family:'Sora';font-weight:700;font-size:17px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .1s ease,filter .2s}
+  .btn:active{transform:scale(.98)}
+  .btn-primary{background:linear-gradient(135deg,var(--lima),var(--lima-esc));color:#0d0d0d;box-shadow:var(--glow)}
+  .btn-primary:disabled{background:#2a2a2a;color:var(--cinza2);box-shadow:none}
+  .btn-ghost{background:var(--card);border:1px solid var(--linha);color:var(--branco);height:52px;font-size:15px}
+  .btn svg{width:22px;height:22px}
+  .acoes-baixo{display:flex;gap:11px;padding:6px 0 24px;position:sticky;bottom:0;
+    background:linear-gradient(to top,var(--preto) 60%,transparent)}
+  .acoes-baixo .btn{margin-top:8px}
+  .completo-box{background:rgba(111,209,26,.1);border:1px solid rgba(111,209,26,.3);border-radius:16px;
+    padding:16px;text-align:center;margin-top:4px}
+  .completo-box .t{font-family:'Sora';font-weight:700;color:var(--lima);font-size:15px}
+  .completo-box .s{font-size:12.5px;color:var(--cinza);margin-top:3px}
+
+  /* ---------- Câmera ---------- */
+  #scr-cam{padding:0;background:#000}
+  .cam-head{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;align-items:center;gap:12px;
+    padding:max(18px,env(safe-area-inset-top)) 20px 14px;background:linear-gradient(to bottom,rgba(0,0,0,.75),transparent)}
+  .cam-head .t{font-family:'Sora';font-weight:700;font-size:16px}
+  .cam-head .s{font-size:12px;color:var(--lima)}
+  .cam-stage{flex:1;position:relative;display:grid;place-items:center;overflow:hidden;background:#000}
+  #video,#shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+  #shot{display:none}
+  .cam-mask{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse 128px 168px at 50% 43%, transparent 95%, rgba(0,0,0,.62) 99%)}
+  .cam-ring{position:absolute;top:43%;left:50%;width:256px;height:336px;transform:translate(-50%,-50%);
+    border-radius:50% 50% 47% 47% / 56% 56% 44% 44%;border:3px solid rgba(111,209,26,.82);box-shadow:0 0 30px rgba(111,209,26,.45)}
+  .cam-hint{position:absolute;top:calc(43% + 185px);left:0;right:0;text-align:center;color:#e8e8e8;font-size:13.5px;
+    text-shadow:0 1px 6px rgba(0,0,0,.9)}
+  .cam-foot{position:absolute;bottom:0;left:0;right:0;z-index:3;display:flex;align-items:center;justify-content:center;
+    gap:40px;padding:24px 20px max(30px,env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(0,0,0,.85),transparent)}
+  .shutter{width:78px;height:78px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.35);
+    cursor:pointer;transition:transform .1s;box-shadow:0 0 0 3px #000 inset}
+  .shutter:active{transform:scale(.9)}
+  .shutter.lima{background:var(--lima);box-shadow:0 0 24px rgba(111,209,26,.7),0 0 0 3px #000 inset}
+  .cam-side{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;cursor:pointer}
+  .cam-side svg{width:24px;height:24px;stroke:#fff}
+  .cam-side.hide{visibility:hidden}
+  .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
+  .flash.go{animation:fl .4s ease}
+  @keyframes fl{0%{opacity:0}18%{opacity:.9}100%{opacity:0}}
+  .cam-fallback{position:absolute;inset:0;z-index:5;display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:20px;padding:30px;text-align:center;background:#0d0d0d}
+  .cam-fallback.show{display:flex}
+  .cam-fallback .ic{width:96px;height:96px;border-radius:50%;background:rgba(111,209,26,.14);display:grid;place-items:center;font-size:44px}
+  #fileInput{display:none}
+
+  /* ---------- Histórico ---------- */
+  .mes-tag{display:inline-block;font-size:12px;color:var(--lima);background:rgba(111,209,26,.1);
+    border:1px solid rgba(111,209,26,.25);padding:5px 12px;border-radius:20px;margin:2px 2px 14px;font-weight:600}
+  .hist-list{display:flex;flex-direction:column;gap:9px;padding-bottom:26px}
+  .hist{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--linha);
+    border-radius:15px;padding:13px 15px}
+  .hist .h-ic{width:40px;height:40px;border-radius:11px;background:#232323;display:grid;place-items:center;flex:none;color:var(--cinza)}
+  .hist .h-ic svg{width:20px;height:20px}
+  .h-ic.ic-ent{color:var(--lima)} .h-ic.ic-int{color:#f1c40f} .h-ic.ic-vol{color:#34b3f1} .h-ic.ic-sai{color:#9aa0a6}
+  .hist .h-main{flex:1;min-width:0}
+  .hist .h-dt{font-weight:600;font-size:14.5px}
+  .hist .h-tp{font-size:11.5px;color:var(--cinza2);margin-top:1px}
+  .hist .h-hora{font-family:'Sora';font-weight:700;font-size:15px;margin-right:2px}
+  .selo{font-size:10.5px;font-weight:700;color:var(--lima);background:rgba(111,209,26,.13);
+    border:1px solid rgba(111,209,26,.3);padding:4px 9px;border-radius:20px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+  .selo svg{width:12px;height:12px}
+  .vazio{text-align:center;color:var(--cinza2);padding:50px 20px;font-size:14px}
+  .vazio .big{font-size:40px;margin-bottom:12px}
+
+  /* ---------- Correção ---------- */
+  .campo{margin-bottom:15px}
+  .campo label{display:block;font-size:12.5px;color:var(--cinza);margin:0 2px 7px;font-weight:600}
+  .campo input,.campo select,.campo textarea{width:100%;background:var(--card);border:1px solid var(--linha);
+    border-radius:14px;padding:15px 16px;color:var(--branco);font-family:'Inter';font-size:15px;outline:none;transition:.2s}
+  .campo input:focus,.campo select:focus,.campo textarea:focus{border-color:var(--lima)}
+  .campo textarea{resize:none;min-height:88px}
+  .campo select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239aa0a6' stroke-width='2'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
+  .aviso{font-size:12px;color:var(--cinza2);text-align:center;margin:4px 2px 16px;line-height:1.5}
+  .anexo-btn{width:100%;background:var(--card);border:1px dashed #3a3a3a;border-radius:14px;padding:15px 16px;color:var(--cinza);
+    font-family:'Inter';font-size:14.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:.2s}
+  .anexo-btn:active{border-color:var(--lima);color:var(--branco)}
+  .anexo-btn svg{width:19px;height:19px}
+  .anexo-chip{display:none;align-items:center;gap:10px;background:rgba(111,209,26,.1);border:1px solid rgba(111,209,26,.3);
+    border-radius:14px;padding:12px 14px;color:var(--branco);font-size:13.5px}
+  .anexo-chip.show{display:flex}
+  .anexo-chip .af{width:20px;height:20px;color:var(--lima);flex:none}
+  .anexo-chip span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .anexo-chip .rm{background:transparent;border:none;color:var(--cinza);font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
+
+  /* ---------- Modal sucesso ---------- */
+  .overlay{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.72);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;padding:28px}
+  .overlay.show{display:flex}
+  .modal{background:#fff;color:#1a1a1a;border-radius:26px;padding:34px 26px 28px;width:100%;max-width:340px;text-align:center;
+    animation:pop .35s cubic-bezier(.2,1.3,.4,1)}
+  @keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal .check{width:84px;height:84px;border-radius:50%;background:var(--lima);display:grid;place-items:center;margin:0 auto 18px;
+    box-shadow:0 8px 24px rgba(111,209,26,.4);animation:ring .5s ease}
+  @keyframes ring{from{transform:scale(.5)}to{transform:scale(1)}}
+  .modal .check svg{width:44px;height:44px;stroke:#fff;stroke-width:3}
+  .modal .m-tit{font-family:'Sora';font-weight:800;font-size:21px}
+  .modal .m-sub{color:#555;font-size:14px;margin:8px 0 4px;line-height:1.5}
+  .modal .m-info{background:#f4f7f0;border-radius:14px;padding:14px;margin:18px 0 6px;display:flex;justify-content:space-around}
+  .modal .m-info .bloco .k{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.4px}
+  .modal .m-info .bloco .v{font-family:'Sora';font-weight:700;font-size:18px;color:#1a1a1a;margin-top:2px}
+  .modal .m-btn{margin-top:18px;width:100%;height:52px;border:none;border-radius:15px;background:#0d0d0d;color:#fff;
+    font-family:'Sora';font-weight:700;font-size:16px;cursor:pointer}
+  .modal.erro .check{background:var(--vermelho);box-shadow:0 8px 24px rgba(241,81,111,.4)}
+  .modal.alerta .check{background:var(--amarelo);box-shadow:0 8px 24px rgba(241,196,15,.4)}
+
+  /* ---------- Toast + loader ---------- */
+  .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);z-index:30;background:#fff;color:#1a1a1a;
+    padding:13px 20px;border-radius:14px;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.4);
+    opacity:0;transition:.3s;max-width:88%;text-align:center}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast.err{background:var(--vermelho);color:#fff}
+  .loader{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center}
+  .loader.show{display:flex}
+  .spin{width:52px;height:52px;border-radius:50%;border:4px solid rgba(111,209,26,.25);border-top-color:var(--lima);animation:sp .8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  /* mini menu (bottom sheet) do comprovante */
+  .sheet-ov{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);display:none;align-items:flex-end;justify-content:center}
+  .sheet-ov.show{display:flex;animation:fadein .2s ease}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  .sheet{width:100%;max-width:480px;background:#161616;border:1px solid var(--linha);border-bottom:none;
+    border-radius:24px 24px 0 0;padding:8px 16px max(20px,env(safe-area-inset-bottom));animation:up .3s cubic-bezier(.2,1,.4,1)}
+  @keyframes up{from{transform:translateY(100%)}to{transform:none}}
+  .sheet-grip{width:40px;height:4px;border-radius:4px;background:#3a3a3a;margin:8px auto 4px}
+  .sheet-title{text-align:center;font-size:12.5px;color:var(--cinza);padding:4px 0 12px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+  .sheet-op{width:100%;display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--linha);
+    border-radius:16px;padding:14px 16px;margin-bottom:10px;cursor:pointer;text-align:left;transition:.15s}
+  .sheet-op:active{background:var(--card2);border-color:var(--lima)}
+  .sheet-op .so-ic{width:44px;height:44px;border-radius:12px;background:rgba(111,209,26,.14);display:grid;place-items:center;flex:none;color:var(--lima)}
+  .sheet-op .so-ic svg{width:22px;height:22px}
+  .sheet-op .so-tx{display:flex;flex-direction:column}
+  .sheet-op .so-tx b{font-size:15px;font-weight:600;color:var(--branco)}
+  .sheet-op .so-tx small{font-size:12px;color:var(--cinza2);margin-top:1px}
+  .sheet-cancel{width:100%;background:transparent;border:none;color:var(--cinza);font-family:'Sora';font-weight:600;font-size:15px;padding:14px;cursor:pointer;margin-top:2px}
+  .sheet-cancel:active{color:var(--branco)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ HOME ============ -->
+  <section id="scr-home" class="screen active">
+    <div class="brand">
+      <div class="logo"><img id="brandLogo" src="data:image/jpeg;base64,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" alt="Arte Style"></div>
+      <div class="id-txt">
+        <div class="nome">Arte Style</div>
+        <div class="sub">Ponto Digital</div>
+      </div>
+      <div class="relogio"><div class="hora" id="clk-h">00:00</div><div class="data" id="clk-d">—</div></div>
+      <button id="btn-admin" class="admin-btn" title="Administração" aria-label="Administração"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></button>
+    </div>
+    <div class="equipe-head">
+      <div class="eh-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 21c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 6.5a3 3 0 0 1 0 6"/></svg></div>
+      <div class="eh-tx"><b>Equipe</b><small>Selecione seu nome para registrar o ponto.</small></div>
+      <span class="eh-chip" id="eq-count">—</span>
+    </div>
+    <div class="grade" id="grade"></div>
+    <div class="home-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg><span>Segurança e <b>confiança</b> em cada registro.</span></div>
+  </section>
+
+  <!-- ============ PIN ============ -->
+  <section id="scr-pin" class="screen">
+    <div class="top">
+      <div class="back" data-go="home"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="pin-wrap">
+      <div class="pin-avatar" id="pin-av">?</div>
+      <div class="pin-nome" id="pin-nome">—</div>
+      <div class="pin-info">Digite seu PIN de 4 dígitos</div>
+      <div class="dots" id="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+      <div class="keys" id="keys"></div>
+    </div>
+  </section>
+
+  <!-- ============ JORNADA ============ -->
+  <section id="scr-func" class="screen">
+    <div class="top">
+      <div class="avatar-mini" id="f-av">?</div>
+      <div style="flex:1">
+        <div class="h-nome" id="f-nome">—</div>
+        <div class="h-sub" id="f-data">—</div>
+      </div>
+      <div class="back" data-go="home" title="Sair"><svg viewBox="0 0 24 24" fill="none"><path d="M16 17l5-5-5-5M21 12H9M12 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+
+    <div class="cron-card" id="cron-card">
+      <div class="badge-int"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>Em intervalo</div>
+      <div class="cron-lbl">Tempo trabalhado hoje</div>
+      <div class="cron-time" id="cron-time">00:00:00</div>
+      <div class="cron-sub" id="cron-sub">Aguardando entrada</div>
+    </div>
+
+    <div class="passos" id="passos"></div>
+
+    <div class="acoes-baixo">
+      <button class="btn btn-ghost" style="flex:1" data-go="hist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2" stroke-linecap="round"/><circle cx="12" cy="12" r="9"/></svg>Histórico</button>
+      <button class="btn btn-ghost" style="flex:1" data-go="corr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" stroke-linecap="round" stroke-linejoin="round"/></svg>Corrigir</button>
+    </div>
+  </section>
+
+  <!-- ============ CÂMERA ============ -->
+  <section id="scr-cam" class="screen">
+    <div class="cam-head">
+      <div class="back" id="cam-back" style="background:rgba(255,255,255,.14);border:none"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="t">Selfie de confirmação</div><div class="s" id="cam-tipo">Entrada</div></div>
+    </div>
+    <div class="cam-stage">
+      <video id="video" autoplay playsinline muted></video>
+      <img id="shot" alt="">
+      <div class="cam-mask" id="cam-mask"></div>
+      <div class="cam-ring" id="cam-ring"></div>
+      <div class="cam-hint" id="cam-hint">Encaixe seu rosto no contorno</div>
+      <div class="flash" id="flash"></div>
+      <div class="cam-fallback" id="cam-fallback">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#6FD11A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:44px;height:44px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg></div>
+        <div style="font-family:'Sora';font-weight:700;font-size:18px">Tirar selfie</div>
+        <div style="color:var(--cinza);font-size:13.5px;max-width:250px">Toque no botão para abrir a câmera e registrar sua foto.</div>
+        <button class="btn btn-primary" style="max-width:240px" id="btn-file">Abrir câmera</button>
+      </div>
+    </div>
+    <div class="cam-foot" id="cam-foot">
+      <div class="cam-side hide" id="cam-repetir" title="Repetir"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 4v4h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="shutter" id="shutter"></div>
+      <div class="cam-side hide" id="cam-ok" title="Confirmar"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" capture="user">
+  </section>
+
+  <!-- ============ HISTÓRICO ============ -->
+  <section id="scr-hist" class="screen">
+    <div class="top">
+      <div class="back" data-go="func"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome">Histórico de pontos</div><div class="h-sub" id="hist-nome">—</div></div>
+    </div>
+    <span class="mes-tag" id="hist-mes">—</span>
+    <div class="hist-list" id="hist-list"></div>
+  </section>
+
+  <!-- ============ CORREÇÃO ============ -->
+  <section id="scr-corr" class="screen">
+    <div class="top">
+      <div class="back" data-go="func"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome">Solicitar correção</div><div class="h-sub">Esqueceu de bater? Peça o ajuste.</div></div>
+    </div>
+    <div style="padding-top:8px">
+      <div class="campo">
+        <label>Dia do mês</label>
+        <input type="number" id="c-dia" min="1" max="31" placeholder="Ex: 22" inputmode="numeric">
+      </div>
+      <div class="campo">
+        <label>Qual ponto</label>
+        <select id="c-periodo">
+          <option value="entrada">Entrada</option>
+          <option value="ini_intervalo">Início do intervalo</option>
+          <option value="volta_intervalo">Volta do intervalo</option>
+          <option value="saida">Saída</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Horário correto</label>
+        <input type="text" id="c-hora" placeholder="Ex: 08:00" inputmode="numeric">
+      </div>
+      <div class="campo">
+        <label>Motivo</label>
+        <textarea id="c-motivo" placeholder="Explique o que aconteceu..."></textarea>
+      </div>
+      <div class="campo">
+        <label>Comprovante (opcional) &middot; atestado, foto, PDF</label>
+        <button type="button" class="anexo-btn" id="btn-anexo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 0 1-7.07-7.07l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> Tirar foto ou anexar arquivo</button>
+        <div class="anexo-chip" id="anexo-chip">
+          <svg class="af" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          <span id="anexo-nome">arquivo</span>
+          <button type="button" class="rm" id="anexo-rm" aria-label="Remover">&#10005;</button>
+        </div>
+        <input type="file" id="anexoCam" accept="image/*" capture="environment" style="display:none">
+        <input type="file" id="anexoFile" accept="image/*,application/pdf" style="display:none">
+      </div>
+      <div class="aviso">A solicitação vai para o supervisor aprovar ou reprovar. O ponto só muda depois da aprovação.</div>
+      <button class="btn btn-primary" id="btn-corr" style="margin-bottom:26px">Enviar solicitação</button>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN LOGIN ============ -->
+  <section id="scr-adminlogin" class="screen">
+    <div class="top">
+      <div class="back" data-go="home"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome">Área do administrador</div><div class="h-sub">Acesso restrito</div></div>
+    </div>
+    <div class="admin-login-wrap">
+      <div class="admin-shield"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div class="login-sub">Entre com usuário e senha</div>
+      <input type="text" id="adminUser" class="admin-inp" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="usuário">
+      <div class="pass-wrap">
+        <input type="password" id="adminInput" class="admin-inp" autocomplete="current-password" placeholder="senha">
+        <button type="button" class="eye" data-eye="adminInput" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <button class="btn btn-primary" id="btn-adminentrar" style="max-width:300px;width:100%">Entrar</button>
+      <div class="login-erro" id="admin-erro"></div>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN MENU ============ -->
+  <section id="scr-adminmenu" class="screen">
+    <div class="top">
+      <div class="back" data-go="home"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div style="flex:1"><div class="h-nome">Administração</div><div class="h-sub" id="admin-hd-sub">Escolha uma opção</div></div>
+      <div class="avatar-mini" id="admin-hd-av" style="display:none;border-color:var(--lima);color:var(--lima)"></div>
+    </div>
+    <div class="amenu-list">
+      <button class="amenu" data-am="colab"><span class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 21c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 6.5a3 3 0 0 1 0 6M21 21c0-2.6-1.4-4.4-3.5-5.1"/></svg></span><span class="atx"><b>Colaboradores</b><small>Cadastrar, editar, PIN e biometria</small></span><svg class="achev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="amenu" data-am="corr"><span class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="atx"><b>Correções pendentes</b><small>Aprovar ou reprovar pedidos</small></span><span class="abadge" id="corr-badge"></span><svg class="achev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="amenu" data-am="rel"><span class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="atx"><b>Relatório de ponto</b><small>Horas e saldo de cada um</small></span><svg class="achev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="amenu" data-am="cfg"><span class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 6.6 19.4a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.8 2 2 0 1 1 3 9.8h.1A1.6 1.6 0 0 0 4.6 7.6a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 2.7-1.1V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1 2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></span><span class="atx"><b>Configurações</b><small>Senha, jornada, dispositivo</small></span><svg class="achev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="amenu" data-am="fer"><span class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="atx"><b>Feriados</b><small>Dias que não contam débito</small></span><svg class="achev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN CORREÇÕES ============ -->
+  <section id="scr-admincorr" class="screen">
+    <div class="top">
+      <div class="back" data-go="adminmenu"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome">Correções pendentes</div><div class="h-sub">Aprove ou reprove os pedidos</div></div>
+    </div>
+    <div class="corr-list" id="corr-list"></div>
+  </section>
+
+  <!-- ============ ADMIN RELATÓRIO (lista) ============ -->
+  <section id="scr-adminrel" class="screen">
+    <div class="top">
+      <div class="back" data-go="adminmenu"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome">Relatório de ponto</div><div class="h-sub" id="rel-mes">Mês atual</div></div>
+    </div>
+    <div class="rel-list" id="rel-list"></div>
+  </section>
+
+  <!-- ============ ADMIN RELATÓRIO (detalhe) ============ -->
+  <section id="scr-adminreldet" class="screen">
+    <div class="top">
+      <div class="back" data-go="adminrel"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome" id="reld-nome">Colaborador</div><div class="h-sub" id="reld-mes">Mês</div></div>
+    </div>
+    <div class="reld-kpis" id="reld-kpis"></div>
+    <div class="reld-wrap" id="reld-wrap"></div>
+  </section>
+
+  <!-- ============ ADMIN CONFIGURAÇÕES ============ -->
+  <section id="scr-admincfg" class="screen">
+    <div class="top">
+      <div class="back" data-go="adminmenu"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome">Configurações</div><div class="h-sub">Jornada, senha e dispositivo</div></div>
+    </div>
+    <div class="cfg-sec">Jornada de trabalho</div>
+    <div class="cfg-card">
+      <label class="cfg-row"><span>Seg a sex (por dia)</span><input type="text" id="cfg-semana" class="cfg-hm" inputmode="numeric" maxlength="5" placeholder="08:00"></label>
+      <label class="cfg-row"><span>Sábado (por dia)</span><input type="text" id="cfg-sabado" class="cfg-hm" inputmode="numeric" maxlength="5" placeholder="04:00"></label>
+      <label class="cfg-row"><span>Tolerância (min)</span><input type="text" id="cfg-tol" class="cfg-hm" inputmode="numeric" maxlength="3" placeholder="15"></label>
+      <label class="cfg-row"><span>Almoço padrão (min)</span><input type="text" id="cfg-almoco" class="cfg-hm" inputmode="numeric" maxlength="3" placeholder="120"></label>
+      <button class="btn btn-primary" id="cfg-salvar" style="margin-top:4px">Salvar jornada</button>
+      <div class="cfg-hint">Domingo não conta jornada. Se o funcionário esquecer de bater o almoço num dia longo, o sistema desconta o "almoço padrão". Ao salvar, os saldos do mês são recalculados.</div>
+    </div>
+    <div class="cfg-sec">Conta do admin</div>
+    <div class="cfg-card">
+      <div class="cfg-userhd">
+        <div class="cfg-uav" id="cfg-uav">A</div>
+        <div class="cfg-uinfo"><small>Logado como</small><b id="cfg-uname">—</b></div>
+        <button class="cfg-fotobtn" id="cfg-userfoto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>Foto</button>
+      </div>
+      <div class="cfg-div"></div>
+      <label class="cfg-lbl">Trocar usuário</label>
+      <input type="text" id="cfg-novouser" class="cfg-inp" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="novo nome de usuário">
+      <button class="btn btn-ghost" id="cfg-trocaruser">Salvar usuário</button>
+      <div class="cfg-div"></div>
+      <label class="cfg-lbl">Trocar senha</label>
+      <div class="pass-wrap"><input type="password" id="cfg-senha1" class="cfg-inp" placeholder="Nova senha" autocomplete="new-password"><button type="button" class="eye" data-eye="cfg-senha1" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+      <div class="pass-wrap"><input type="password" id="cfg-senha2" class="cfg-inp" placeholder="Repita a nova senha" autocomplete="new-password"><button type="button" class="eye" data-eye="cfg-senha2" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+      <div class="cfg-erro" id="cfg-senha-erro"></div>
+      <button class="btn btn-ghost" id="cfg-trocar">Trocar senha</button>
+    </div>
+    <div class="cfg-sec">Dispositivo autorizado</div>
+    <div class="cfg-card">
+      <div class="cfg-disp" id="cfg-disp">—</div>
+      <div class="cfg-hint">O 1º aparelho que bater vira o autorizado. Se outro bater, o ponto entra marcado como suspeito (vermelho na planilha) — não é bloqueado. Resetar limpa o autorizado: o próximo a bater vira o novo.</div>
+      <button class="btn btn-ghost cfg-danger" id="cfg-reset">Resetar dispositivo</button>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN FERIADOS ============ -->
+  <section id="scr-adminfer" class="screen">
+    <div class="top">
+      <div class="back" data-go="adminmenu"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome">Feriados</div><div class="h-sub">Dias que não geram débito</div></div>
+    </div>
+    <div class="fer-add">
+      <input type="date" id="fer-data" class="fer-inp fer-date">
+      <input type="text" id="fer-nome" class="fer-inp" placeholder="Nome (ex: Independência)" autocomplete="off">
+      <button class="btn btn-primary" id="fer-add">Adicionar feriado</button>
+    </div>
+    <div class="cfg-hint" style="margin:10px 2px 14px">No feriado a jornada esperada é zero: quem não trabalha não fica devendo, e quem trabalha ganha as horas como extra. Ao adicionar ou remover, os saldos do mês são recalculados.</div>
+    <div class="admin-sec">Feriados cadastrados</div>
+    <div class="fer-list" id="fer-list"></div>
+  </section>
+
+  <!-- ============ ADMIN COLABORADORES ============ -->
+  <section id="scr-admin" class="screen">
+    <div class="top">
+      <div class="back" data-go="adminmenu"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome">Colaboradores</div><div class="h-sub">Cadastrar, editar, PIN, biometria</div></div>
+    </div>
+    <button class="btn btn-primary" id="btn-novo" style="margin:2px 0 12px"><svg viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Novo colaborador</button>
+    <div class="admin-novo" id="admin-novo">
+      <input type="text" id="novo-nome" placeholder="Nome do colaborador" autocomplete="off">
+      <input type="text" id="novo-pin" inputmode="numeric" maxlength="4" placeholder="PIN (4 números)" autocomplete="off">
+      <div class="admin-novo-btns">
+        <button class="btn btn-ghost" id="novo-cancelar">Cancelar</button>
+        <button class="btn btn-primary" id="novo-salvar">Cadastrar</button>
+      </div>
+    </div>
+    <div class="admin-sec">Nome e PIN de cada um</div>
+    <div class="admin-list" id="admin-list"></div>
+    <div class="admin-soon">Foto e biometria de cadastro entram na próxima fase.</div>
+  </section>
+
+</div>
+
+<!-- Overlays -->
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+<div class="loader" id="loader"><div class="spin"></div></div>
+<div class="sheet-ov" id="anexo-sheet">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-title">Anexar comprovante</div>
+    <button type="button" class="sheet-op" id="op-cam">
+      <span class="so-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg></span>
+      <span class="so-tx"><b>Tirar foto</b><small>Usar a câmera agora</small></span>
+    </button>
+    <button type="button" class="sheet-op" id="op-file">
+      <span class="so-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span>
+      <span class="so-tx"><b>Escolher arquivo</b><small>Foto da galeria ou PDF</small></span>
+    </button>
+    <button type="button" class="sheet-cancel" id="op-cancel">Cancelar</button>
+  </div>
+</div>
+<input type="file" id="bioCam" accept="image/*" capture="user" style="display:none">
+<input type="file" id="bioFile" accept="image/*" style="display:none">
+<input type="file" id="fotoCam" accept="image/*" capture="user" style="display:none">
+<input type="file" id="fotoFile" accept="image/*" style="display:none">
+<canvas id="canvas" style="display:none"></canvas>
+
+<script>
+/* ================= CONFIG ================= */
+var CORES = ['#6FD11A','#34b3f1','#f19a34','#b06ff1','#f16f9a','#f1d234','#f15168','#4de0c0'];
+var TIPO_LABEL = {entrada:'Entrada', ini_intervalo:'Início do intervalo', volta_intervalo:'Volta do intervalo', saida:'Saída'};
+var TIPO_EST   = {entrada:'Começo do expediente', ini_intervalo:'Saída para o almoço', volta_intervalo:'Retorno do almoço', saida:'Fim do expediente'};
+var SVG_A='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">', SVG_B='</svg>';
+var TIPO_SVG = {
+  entrada: SVG_A+'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>'+SVG_B,
+  ini_intervalo: SVG_A+'<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 1v3M10 1v3M14 1v3"/>'+SVG_B,
+  volta_intervalo: SVG_A+'<path d="M9 14L4 9l5-5"/><path d="M4 9h11a6 6 0 0 1 0 12h-3"/>'+SVG_B,
+  saida: SVG_A+'<path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>'+SVG_B
+};
+var CHECK_SVG = SVG_A.replace('stroke-width="2"','stroke-width="2.6"')+'<path d="M5 13l4 4L19 7"/>'+SVG_B;
+var STATUS = {
+  fora:      {label:'Aguardando',   cls:'st-fora'},
+  entrada:   {label:'Trabalhando',  cls:'st-trab'},
+  intervalo: {label:'Em intervalo', cls:'st-int'},
+  volta:     {label:'De volta',     cls:'st-volta'},
+  saida:     {label:'Encerrado',    cls:'st-fim'}
+};
+function svgTipoLabel(t){ return t.indexOf('Entrada')>=0?TIPO_SVG.entrada : t.indexOf('Início')>=0?TIPO_SVG.ini_intervalo : t.indexOf('Volta')>=0?TIPO_SVG.volta_intervalo : TIPO_SVG.saida; }
+function clsTipoLabel(t){ return t.indexOf('Entrada')>=0?'ic-ent' : t.indexOf('Início')>=0?'ic-int' : t.indexOf('Volta')>=0?'ic-vol' : 'ic-sai'; }
+
+/* ================= ESTADO ================= */
+var S = { func:null, pin:'', estado:null, foto:null, anexo:null, deviceId:null, ip:'', camStream:null, tickTimer:null, adminSenha:'', adminToken:'', adminUser:'', adminFoto:'', bio:null, adminFuncs:[], fotos:{}, capMode:false, capCb:null, capReturn:'admin' };
+
+/* ================= HELPERS DOM ================= */
+function $(id){return document.getElementById(id)}
+function corDe(i){return CORES[i % CORES.length]}
+function iniciais(n){var p=n.trim().split(/\s+/);return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase()}
+function pad(n){return n<10?'0'+n:''+n}
+
+function show(scr){
+  var alvo = 'scr-'+scr;
+  var atual = document.querySelector('.screen.active');
+  if(atual && atual.id===alvo) return;
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  $(alvo).classList.add('active');
+  $(alvo).scrollTop = 0;
+  if(scr!=='cam') pararCamera();
+}
+
+/* ================= SERVIDOR (API do Apps Script via fetch; mock só p/ preview local) ================= */
+var BACKEND = 'https://script.google.com/macros/s/AKfycbzGviCKfHY0e-_dr3apD3SPn8HZ2B_D3GLNpBirHMLVJQJJD2IsOMyt1vWYtLlXEpw3/exec';
+function server(fn){
+  var args = Array.prototype.slice.call(arguments,1);
+  if(location.protocol==='file:'){ // preview local sem backend
+    return new Promise(function(resolve){ setTimeout(function(){ resolve(MOCK[fn]?MOCK[fn].apply(null,args):null) }, 300); });
+  }
+  if(window.google && google.script && google.script.run){ // servido pelo próprio Apps Script (/exec): ponte nativa (fetch é bloqueado no iframe)
+    return new Promise(function(resolve, reject){
+      var r = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+      r[fn].apply(r, args);
+    });
+  }
+  return fetch(BACKEND, { // hospedado fora do Apps Script (câmera funciona): chama a API por fetch
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'}, // requisição "simples": sem preflight CORS
+    body: JSON.stringify({ fn:fn, args:args }),
+    redirect:'follow'
+  }).then(function(r){ return r.json(); });
+}
+var MOCK = {
+  getFuncionarios:function(){return [
+    {id:'diego',nome:'Diego'},{id:'derick',nome:'Derick'},{id:'luan',nome:'Luan'},{id:'adonias',nome:'Adonias'},
+    {id:'beto',nome:'Beto'},{id:'lucas',nome:'Lucas'},{id:'vanessa',nome:'Vanessa'}]},
+  getPainel:function(){return [
+    {id:'diego',nome:'Diego',status:'entrada'},{id:'derick',nome:'Derick',status:'intervalo'},
+    {id:'luan',nome:'Luan',status:'volta'},{id:'adonias',nome:'Adonias',status:'saida'},
+    {id:'beto',nome:'Beto',status:'fora'},{id:'lucas',nome:'Lucas',status:'entrada'},
+    {id:'vanessa',nome:'Vanessa',status:'intervalo'}]},
+  entrar:function(id,pin){return {ok:true, nome:capitaliza(id), estado:MOCK.getEstado(id)}},
+  getEstado:function(id){return {proximo:'entrada',feitos:{},sequencia:['entrada','ini_intervalo','volta_intervalo','saida'],dia:'Sex',horasHoje:'00:00',saldo:''}},
+  baterPonto:function(p){return {ok:true,hora:agora(),tipo:p.tipo,nome:capitaliza(p.id),horasHoje:'00:00',saldo:''}},
+  solicitarCorrecao:function(){return {ok:true}},
+  adminLogin:function(user,senha){ if(!user||!senha) return {ok:false,erro:'Usuário ou senha incorretos'}; return {ok:true,user:user||'lukasadmin',foto:'',token:'mocktoken'}; },
+  adminTrocarUsuario:function(user,senha,novo){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,user:novo}; },
+  adminSalvarFotoPerfil:function(senha,id,d){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,foto:d}; },
+  adminRemoverFotoPerfil:function(){ return {ok:true}; },
+  adminSalvarFotoUser:function(token,d){ if(!token) return {ok:false,erro:'Sessão expirada'}; return {ok:true,foto:d}; },
+  adminListar:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; var pins={diego:'1010',derick:'2020',luan:'3030',adonias:'4040',beto:'5050',lucas:'6060',vanessa:'7070'}; return {ok:true, funcionarios:MOCK.getFuncionarios().map(function(f){ return {id:f.id,nome:f.nome,pin:pins[f.id]||'0000',temBio:false,foto:''}; })}; },
+  adminSalvarPin:function(){ return {ok:true}; },
+  adminSalvarNome:function(){ return {ok:true}; },
+  adminCadastrar:function(senha,nome,pin){ if(!senha) return {ok:false,erro:'Senha incorreta'}; var l=MOCK.adminListar('x').funcionarios.slice(); l.push({id:'novo'+l.length,nome:nome,pin:pin}); return {ok:true,funcionarios:l}; },
+  adminRemover:function(senha,id){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,funcionarios:MOCK.adminListar('x').funcionarios.filter(function(f){return f.id!==id;})}; },
+  adminSalvarBio:function(){ return {ok:true,temBio:true}; },
+  adminCorrecoes:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,correcoes:[
+    {row:2,ts:'25/08 09:41',func:'Diego',dia:'22',periodo:'Entrada',horario:'08:00',motivo:'Cheguei mas esqueci de bater o ponto',comprovante:''},
+    {row:3,ts:'25/08 10:12',func:'Vanessa',dia:'21',periodo:'Saída',horario:'18:00',motivo:'Sistema travou na hora de sair',comprovante:'https://drive.google.com/file/d/exemplo/view'}
+  ]}; },
+  adminResolverCorrecao:function(senha,row){ if(!senha) return {ok:false,erro:'Senha incorreta'}; var r=MOCK.adminCorrecoes('x').correcoes.filter(function(c){return c.row!==row;}); return {ok:true,correcoes:r}; },
+  adminRelatorio:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,mes:'Agosto/2026',funcionarios:[
+    {id:'diego',nome:'Diego',dias:18,horas:'144:30',saldo:'+2:30',saldoMin:150},
+    {id:'vanessa',nome:'Vanessa',dias:17,horas:'132:00',saldo:'-4:00',saldoMin:-240},
+    {id:'beto',nome:'Roberto',dias:18,horas:'144:00',saldo:'00:00',saldoMin:0}
+  ]}; },
+  adminRelatorioFunc:function(senha,id){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,nome:id==='vanessa'?'Vanessa':'Diego',mes:'Agosto/2026',totalHoras:'144:30',totalSaldo:'+2:30',dias:18,linhas:[
+    {data:'22/08',dia:'Sex',entrada:'08:02',ini:'12:00',volta:'14:00',saida:'18:30',horas:'8:28',saldo:'+0:28'},
+    {data:'21/08',dia:'Qui',entrada:'08:00',ini:'12:00',volta:'14:00',saida:'18:00',horas:'8:00',saldo:'00:00'},
+    {data:'20/08',dia:'Qua',entrada:'08:15',ini:'12:00',volta:'14:00',saida:'18:00',horas:'7:45',saldo:'-0:15'}
+  ]}; },
+  adminConfig:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,jornadaSemana:480,jornadaSabado:240,tolerancia:15,almoco:120,dispositivo:'exemplo-uuid-1234'}; },
+  adminSalvarConfig:function(senha,cfg){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,jornadaSemana:cfg.jornadaSemana,jornadaSabado:cfg.jornadaSabado,tolerancia:cfg.tolerancia,almoco:cfg.almoco,dispositivo:'exemplo-uuid-1234'}; },
+  adminTrocarSenha:function(user,senhaAtual,nova){ if(!senhaAtual) return {ok:false,erro:'Senha atual incorreta'}; return {ok:true}; },
+  adminResetarDispositivo:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,dispositivo:'(nenhum registrado ainda)'}; },
+  adminFeriados:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,feriados:[{data:'2026-09-07',nome:'Independência',dataBr:'07/09/2026'}]}; },
+  adminAddFeriado:function(senha,data,nome){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,feriados:[{data:'2026-09-07',nome:'Independência',dataBr:'07/09/2026'},{data:data,nome:nome||'Feriado',dataBr:String(data).split('-').reverse().join('/')}]}; },
+  adminRemoverFeriado:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,feriados:[]}; },
+  getHistorico:function(id){return {mes:'Agosto/2026', registros:[
+    {data:'22/08',dia:'Sex',hora:'12:00',tipo:'Início do intervalo',status:'Registrado'},
+    {data:'22/08',dia:'Sex',hora:'08:02',tipo:'Entrada',status:'Registrado'},
+    {data:'21/08',dia:'Qui',hora:'18:00',tipo:'Saída',status:'Registrado'},
+    {data:'21/08',dia:'Qui',hora:'08:00',tipo:'Entrada',status:'Registrado'}]}}
+};
+function capitaliza(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function agora(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
+
+/* ================= LOADER / TOAST / MODAL ================= */
+function loader(on){$('loader').classList.toggle('show',on)}
+var toastTimer;
+function toast(msg,err){var t=$('toast');t.textContent=msg;t.classList.toggle('err',!!err);t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show')},2600)}
+function modal(html,tipo){var m=$('modal');m.className='modal'+(tipo?' '+tipo:'');m.innerHTML=html;$('overlay').classList.add('show')}
+function fecharModal(){$('overlay').classList.remove('show')}
+
+/* ================= RELÓGIO ================= */
+function tickRelogio(){
+  var d=new Date();
+  $('clk-h').textContent = pad(d.getHours())+':'+pad(d.getMinutes());
+  var dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  var meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  $('clk-d').textContent = dias[d.getDay()]+', '+d.getDate()+' '+meses[d.getMonth()];
+}
+setInterval(tickRelogio,1000);
+
+/* ================= INIT ================= */
+function iniciar(){
+  tickRelogio();
+  S.deviceId = localStorage.getItem('pontoDeviceId');
+  if(!S.deviceId){ S.deviceId = 'dev-'+Math.random().toString(36).slice(2)+'-'+(new Date().getTime()); localStorage.setItem('pontoDeviceId',S.deviceId); }
+  try{ fetch('https://api.ipify.org?format=json').then(function(r){return r.json()}).then(function(j){S.ip=j.ip||''}).catch(function(){}); }catch(e){}
+  montarTeclado();
+  loader(true);
+  // fotos vêm 1x aqui e ficam em cache (S.fotos); getPainel a cada 25s traz só status
+  server('getFuncionarios').then(function(list){ (list||[]).forEach(function(f){ if(f&&f.foto) S.fotos[f.id]=f.foto; }); }).catch(function(){}).then(function(){ refreshPainel(true); });
+  setInterval(function(){ if($('scr-home').classList.contains('active')) refreshPainel(false); }, 25000);
+}
+function refreshPainel(comLoader){
+  server('getPainel').then(function(list){
+    if(comLoader) loader(false);
+    if(list && list.length) montarGrade(list);
+  }).catch(function(){ if(comLoader){ loader(false); toast('Erro ao carregar',true); } });
+}
+
+/* ================= HOME ================= */
+function montarGrade(list){
+  var g=$('grade'); g.innerHTML='';
+  var c=$('eq-count'); if(c) c.textContent=list.length+' '+(list.length===1?'pessoa':'pessoas');
+  list.forEach(function(f,i){
+    if(f.foto) S.fotos[f.id]=f.foto;
+    var st=STATUS[f.status]||STATUS.fora; var cor=corDe(i);
+    var el=document.createElement('div'); el.className='func';
+    el.innerHTML='<div class="avatar" style="border-color:'+cor+';color:'+cor+'">'+avatarInner(f)+'</div>'+
+      '<div class="fnome">'+escAttr(f.nome)+'</div>'+
+      '<div class="stag '+st.cls+'"><i></i>'+st.label+'</div>'+
+      '<svg class="fchev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+    el.addEventListener('click',function(){ abrirPin(f,i) });
+    g.appendChild(el);
+  });
+}
+function avatarInner(f){ var foto=f.foto||S.fotos[f.id]; return foto?'<img src="'+escAttr(foto)+'" alt="">':iniciais(f.nome); }
+function pintarAvatar(el, f, cor){ var foto=f.foto||S.fotos[f.id]; el.style.borderColor=cor;
+  if(foto){ el.innerHTML='<img src="'+escAttr(foto)+'" alt="">'; } else { el.innerHTML=''; el.textContent=iniciais(f.nome); el.style.color=cor; } }
+
+/* ================= PIN ================= */
+function montarTeclado(){
+  var k=$('keys'); k.innerHTML='';
+  var seq=['1','2','3','4','5','6','7','8','9','','0','del'];
+  seq.forEach(function(v){
+    var b=document.createElement('div');
+    if(v===''){ b.className='key acao'; b.style.visibility='hidden'; }
+    else if(v==='del'){ b.className='key acao'; b.innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="M21 5H8L2 12l6 7h13a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1Z" stroke-width="2" stroke-linejoin="round"/><path d="M15 9l-4 6M11 9l4 6" stroke-width="2" stroke-linecap="round"/></svg>'; b.addEventListener('click',pinDel); }
+    else { b.className='key'; b.textContent=v; b.addEventListener('click',function(){pinAdd(v)}); }
+    k.appendChild(b);
+  });
+}
+function abrirPin(f,i){
+  S.func=f; S.func.cor=corDe(i); S.pin='';
+  pintarAvatar($('pin-av'), f, corDe(i));
+  $('pin-nome').textContent=f.nome;
+  atualizaDots(); show('pin');
+}
+function atualizaDots(err){
+  var ds=$('dots').children;
+  for(var i=0;i<4;i++){ ds[i].className='dot'+(err?' err':(i<S.pin.length?' on':'')); }
+}
+function pinAdd(v){
+  if(S.pin.length>=4) return;
+  S.pin+=v; atualizaDots();
+  if(S.pin.length===4) setTimeout(validarPin,150);
+}
+function pinDel(){ S.pin=S.pin.slice(0,-1); atualizaDots(); }
+function validarPin(){
+  loader(true);
+  server('entrar', S.func.id, S.pin).then(function(res){
+    loader(false);
+    if(res && res.ok){ S.estado=res.estado; S.bio=res.bio||null; if(res.foto){ S.func.foto=res.foto; S.fotos[S.func.id]=res.foto; } if(S.bio&&S.bio.length) carregarFaceApi().catch(function(){}); abrirFunc(); }
+    else { erroPin(res && res.erro ? res.erro : 'PIN incorreto'); }
+  }).catch(function(){ loader(false); erroPin('Falha ao validar'); });
+}
+function erroPin(msg){
+  atualizaDots(true); toast(msg,true);
+  if(navigator.vibrate) navigator.vibrate(120);
+  setTimeout(function(){ S.pin=''; atualizaDots(); },600);
+}
+
+/* ================= JORNADA ================= */
+function abrirFunc(){
+  pintarAvatar($('f-av'), S.func, S.func.cor);
+  $('f-nome').textContent=S.func.nome;
+  var d=new Date(), dias=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  $('f-data').textContent=dias[d.getDay()]+' · '+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+  renderPassos(); iniciarCronometro(); show('func');
+}
+function renderPassos(){
+  var box=$('passos'); box.innerHTML='';
+  var seq=S.estado.sequencia, feitos=S.estado.feitos, prox=S.estado.proximo;
+  seq.forEach(function(tp){
+    var feito=!!feitos[tp], atual=(tp===prox);
+    var el=document.createElement('div');
+    el.className='passo '+(feito?'feito':(atual?'atual':'futuro'));
+    el.innerHTML='<div class="ic">'+(feito?CHECK_SVG:TIPO_SVG[tp])+'</div>'+
+      '<div class="txt"><div class="p-nome">'+TIPO_LABEL[tp]+'</div><div class="p-est">'+(feito?'Registrado':TIPO_EST[tp])+'</div></div>'+
+      '<div class="p-hora">'+(feito?feitos[tp]:(atual?'agora':'—'))+'</div>';
+    box.appendChild(el);
+  });
+  // botão principal
+  var wrap=document.createElement('div');
+  if(prox==='completo'){
+    wrap.innerHTML='<div class="completo-box"><div class="t">✓ Jornada concluída</div><div class="s">Todos os pontos de hoje foram batidos. Bom descanso!</div></div>';
+  }else{
+    var b=document.createElement('button'); b.className='btn btn-primary'; b.style.marginTop='6px';
+    b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2.4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z" stroke-linejoin="round"/><circle cx="12" cy="13" r="4"/></svg> Bater '+TIPO_LABEL[prox];
+    b.addEventListener('click',function(){ abrirCamera(prox) });
+    wrap.appendChild(b);
+  }
+  box.appendChild(wrap);
+}
+function parseHoje(hhmm){
+  if(!hhmm) return null;
+  var m=String(hhmm).match(/(\d{1,2}):(\d{2})/); if(!m) return null;
+  var d=new Date(); d.setHours(+m[1],+m[2],0,0); return d.getTime();
+}
+function iniciarCronometro(){
+  clearTimeout(S.tickTimer);
+  function tick(){
+    var f=S.estado.feitos;
+    var ent=parseHoje(f.entrada), ini=parseHoje(f.ini_intervalo), vol=parseHoje(f.volta_intervalo), sai=parseHoje(f.saida);
+    var now=new Date().getTime(), base=0, run=null, intervalo=false;
+    if(ent){
+      if(ini){ base+=ini-ent; } else { run=ent; }
+      if(ini&&vol){ if(sai){ base+=sai-vol; } else { run=vol; } }
+      else if(ini&&!vol){ intervalo=true; run=null; }
+      if(!ini&&sai){ base=sai-ent; run=null; }
+    }
+    var ms=base+(run?now-run:0); if(ms<0)ms=0;
+    var totS=Math.floor(ms/1000), h=Math.floor(totS/3600), mn=Math.floor((totS%3600)/60), sc=totS%60;
+    $('cron-time').textContent=pad(h)+':'+pad(mn)+':'+pad(sc);
+    var card=$('cron-card'); card.classList.toggle('intervalo',intervalo);
+    var sub='Aguardando entrada';
+    if(intervalo) sub='Cronômetro pausado no intervalo';
+    else if(sai) sub='Expediente encerrado';
+    else if(run) sub='Contando desde '+(vol&&ini?f.volta_intervalo:f.entrada);
+    $('cron-sub').textContent=sub;
+    S.tickTimer=setTimeout(tick,1000);
+  }
+  tick();
+}
+
+/* ================= CÂMERA ================= */
+function abrirCamera(tipo){
+  S.capMode=false; S.tipoAtual=tipo; S.foto=null; _bioTentativas=0;
+  $('cam-tipo').textContent=TIPO_LABEL[tipo];
+  _prepararCam();
+  show('cam');
+  iniciarCamera();
+}
+// Abre a câmera (mesmo fluxo/moldura da selfie) só para CAPTURAR uma foto e devolver via callback.
+function abrirCameraCaptura(titulo, cb, retorno){
+  S.capMode=true; S.capCb=cb||null; S.capReturn=retorno||'admin'; S.foto=null;
+  $('cam-tipo').textContent=titulo||'Foto';
+  _prepararCam();
+  show('cam');
+  iniciarCamera();
+}
+function _prepararCam(){
+  $('shot').style.display='none'; $('video').style.display='block';
+  $('cam-mask').style.display=''; $('cam-ring').style.display=''; $('cam-hint').style.display='';
+  $('cam-repetir').classList.add('hide'); $('cam-ok').classList.add('hide');
+  $('shutter').classList.remove('lima'); $('shutter').style.display='';
+  $('cam-fallback').classList.remove('show');
+}
+// Botão OK da câmera: no modo captura devolve a foto pro callback; senão, bate o ponto.
+function camOk(){
+  if(S.capMode){
+    if(!S.foto){ toast('Tire a foto primeiro'); return; }
+    var cb=S.capCb, foto=S.foto, ret=S.capReturn; S.capMode=false; S.capCb=null; pararCamera();
+    show(ret); if(cb) cb(foto);
+  } else { confirmarPonto(); }
+}
+function iniciarCamera(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ modoArquivo(); return; }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:720},height:{ideal:720}},audio:false})
+    .then(function(stream){ S.camStream=stream; var v=$('video'); v.srcObject=stream; v.play(); })
+    .catch(function(){ modoArquivo(); });
+}
+function modoArquivo(){
+  $('cam-fallback').classList.add('show');
+  $('cam-mask').style.display='none'; $('cam-ring').style.display='none'; $('cam-hint').style.display='none';
+  $('shutter').style.display='none';
+}
+function pararCamera(){
+  if(S.camStream){ S.camStream.getTracks().forEach(function(t){t.stop()}); S.camStream=null; }
+}
+function capturar(){
+  var v=$('video');
+  if(!v.videoWidth){ toast('Câmera carregando...'); return; }
+  var vw=v.videoWidth, vh=v.videoHeight, ar=3/4, cw, ch; // recorte retrato (largura/altura)
+  if(vw/vh > ar){ ch=vh; cw=vh*ar; } else { cw=vw; ch=vw/ar; }
+  var sx=(vw-cw)/2, sy=(vh-ch)/2;
+  var cv=$('canvas'); cv.width=480; cv.height=640;
+  var ctx=cv.getContext('2d');
+  ctx.translate(cv.width,0); ctx.scale(-1,1); // espelha p/ bater com a prévia
+  ctx.drawImage(v, sx,sy,cw,ch, 0,0,cv.width,cv.height);
+  S.foto=cv.toDataURL('image/jpeg',0.72);
+  var fl=$('flash'); fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+  if(navigator.vibrate) navigator.vibrate(40);
+  var im=$('shot'); im.src=S.foto; im.style.display='block'; $('video').style.display='none';
+  $('cam-ring').style.display='none'; $('cam-hint').style.display='none';
+  $('shutter').classList.add('lima');
+  $('cam-repetir').classList.remove('hide'); $('cam-ok').classList.remove('hide');
+  $('shutter').style.display='none';
+}
+function repetirFoto(){
+  S.foto=null;
+  $('shot').style.display='none'; $('video').style.display='block';
+  $('cam-ring').style.display=''; $('cam-hint').style.display='';
+  $('cam-repetir').classList.add('hide'); $('cam-ok').classList.add('hide');
+  $('shutter').classList.remove('lima'); $('shutter').style.display='';
+}
+$('fileInput').addEventListener('change',function(e){
+  var file=e.target.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){ S.foto=ev.target.result; if(S.capMode){ camOk(); } else { confirmarPonto(); } };
+  reader.readAsDataURL(file);
+});
+
+/* ================= ENVIAR PONTO ================= */
+var LIMIAR_ROSTO=0.55, _bioTentativas=0; // distância <= limiar = mesmo rosto (calibrável)
+function confirmarPonto(){
+  if(!S.foto){ toast('Tire a selfie primeiro'); return; }
+  if(S.bio && S.bio.length){ // colaborador tem biometria -> confere o rosto antes de registrar
+    loader(true);
+    descritorDaFoto(S.foto).then(function(desc){
+      loader(false);
+      if(!desc){ falhaBiometria('Rosto não detectado'); return; }
+      if(distanciaRosto(desc, S.bio) <= LIMIAR_ROSTO){ _bioTentativas=0; enviarPonto(); }
+      else { falhaBiometria('Biometria irreconhecível'); }
+    }).catch(function(){ loader(false); enviarPonto(); }); // se o reconhecimento não carregar, não trava a batida
+  } else { enviarPonto(); }
+}
+function enviarPonto(){
+  pararCamera(); loader(true);
+  server('baterPonto', {id:S.func.id, pin:S.pin, tipo:S.tipoAtual, foto:S.foto, deviceId:S.deviceId, ip:S.ip})
+    .then(function(res){
+      loader(false);
+      if(res && res.ok){
+        S.estado.feitos[S.tipoAtual]=res.hora; recalcProximo();
+        renderPassos(); abrirFunc();
+        modalSucesso(res);
+      } else {
+        show('func'); modal('<div class="check"><svg viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round"/></svg></div>'+
+          '<div class="m-tit">Não foi possível</div><div class="m-sub">'+((res&&res.erro)||'Tente novamente.')+'</div>'+
+          '<button class="m-btn" onclick="fecharModal()">Entendi</button>','erro');
+      }
+    }).catch(function(){ loader(false); show('func'); toast('Falha ao registrar. Tente de novo.',true); });
+}
+function falhaBiometria(msg){
+  _bioTentativas++;
+  if(navigator.vibrate) navigator.vibrate([80,40,80]);
+  if(_bioTentativas>=3){
+    _bioTentativas=0; pararCamera();
+    modal('<div class="check"><svg viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round"/></svg></div>'+
+      '<div class="m-tit">Biometria irreconhecível</div><div class="m-sub">Não reconhecemos o rosto após 3 tentativas. O ponto não foi registrado. Procure o supervisor.</div>'+
+      '<button class="m-btn" onclick="fecharModalBio()">Ok</button>','erro');
+  } else {
+    modal('<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>'+
+      '<div class="m-tit">'+msg+'</div><div class="m-sub">Tentativa '+_bioTentativas+' de 3. Centralize o rosto, boa luz, e tente de novo.</div>'+
+      '<button class="m-btn" onclick="tentarBioDeNovo()">Tentar de novo</button>','alerta');
+  }
+}
+function tentarBioDeNovo(){ fecharModal(); repetirFoto(); if(!S.camStream) iniciarCamera(); }
+function fecharModalBio(){ fecharModal(); show('func'); }
+function recalcProximo(){
+  S.estado.proximo='completo';
+  for(var i=0;i<S.estado.sequencia.length;i++){ var t=S.estado.sequencia[i]; if(!S.estado.feitos[t]){ S.estado.proximo=t; break; } }
+}
+function modalSucesso(res){
+  var suspeito = res.dispositivoSuspeito ? '<div style="font-size:12px;color:#c0392b;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex:none"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Aparelho diferente do habitual. O supervisor foi sinalizado.</div>' : '';
+  modal(
+    '<div class="check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
+    '<div class="m-tit">Ponto registrado!</div>'+
+    '<div class="m-sub">'+TIPO_LABEL[res.tipo]+' de <b>'+res.nome+'</b> confirmada com sucesso.</div>'+
+    '<div class="m-info"><div class="bloco"><div class="k">Horário</div><div class="v">'+res.hora+'</div></div>'+
+    '<div class="bloco"><div class="k">Registro</div><div class="v" style="color:#59ad12">✓ OK</div></div></div>'+
+    suspeito+
+    '<button class="m-btn" onclick="fecharModal()">Concluir</button>','');
+}
+
+/* ================= HISTÓRICO ================= */
+function abrirHistorico(){
+  $('hist-nome').textContent=S.func.nome;
+  $('hist-list').innerHTML='<div class="vazio"><div class="spin" style="margin:0 auto"></div></div>';
+  show('hist');
+  server('getHistorico', S.func.id, S.pin).then(function(res){
+    var mes=(res&&res.mes)||''; var regs=(res&&res.registros)||[];
+    $('hist-mes').textContent=mes;
+    var L=$('hist-list');
+    if(!regs.length){ L.innerHTML='<div class="vazio"><div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:44px;height:44px;opacity:.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>Nenhum ponto batido ainda neste mês.</div>'; return; }
+    L.innerHTML='';
+    regs.forEach(function(r){
+      var el=document.createElement('div'); el.className='hist';
+      el.innerHTML='<div class="h-ic '+clsTipoLabel(r.tipo)+'">'+svgTipoLabel(r.tipo)+'</div>'+
+        '<div class="h-main"><div class="h-dt">'+r.data+(r.dia?' · '+r.dia:'')+'</div><div class="h-tp">'+r.tipo+'</div></div>'+
+        '<div class="h-hora">'+r.hora+'</div>'+
+        '<div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>'+(r.status||'Registrado')+'</div>';
+      L.appendChild(el);
+    });
+  }).catch(function(){ $('hist-list').innerHTML='<div class="vazio">Erro ao carregar histórico.</div>'; });
+}
+
+/* ================= CORREÇÃO ================= */
+function enviarCorrecao(){
+  var dia=$('c-dia').value.trim(), periodo=$('c-periodo').value, hora=$('c-hora').value.trim(), motivo=$('c-motivo').value.trim();
+  if(!dia){ toast('Informe o dia'); return; }
+  if(!hora){ toast('Informe o horário'); return; }
+  if(!motivo){ toast('Descreva o motivo'); return; }
+  loader(true);
+  server('solicitarCorrecao', {id:S.func.id, pin:S.pin, dia:dia, periodo:periodo, horario:hora, motivo:motivo, anexo:S.anexo})
+    .then(function(res){
+      loader(false);
+      if(res && res.ok){
+        $('c-dia').value=''; $('c-hora').value=''; $('c-motivo').value='';
+        limparAnexo();
+        show('func');
+        modal('<div class="check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
+          '<div class="m-tit">Solicitação enviada!</div><div class="m-sub">Seu supervisor vai analisar e aprovar ou reprovar o ajuste.</div>'+
+          '<button class="m-btn" onclick="fecharModal()">Ok</button>','');
+      } else { toast((res&&res.erro)||'Não foi possível enviar',true); }
+    }).catch(function(){ loader(false); toast('Falha ao enviar',true); });
+}
+
+/* ================= ADMIN ================= */
+function abrirAdminLogin(){ $('adminUser').value=''; $('adminInput').value=''; $('admin-erro').textContent=''; show('adminlogin'); setTimeout(function(){ try{$('adminUser').focus();}catch(e){} },300); }
+function atualizarAdminHeader(){
+  var sub=$('admin-hd-sub'); if(sub) sub.textContent=S.adminUser?('Olá, '+S.adminUser):'Escolha uma opção';
+  var av=$('admin-hd-av'); if(!av) return;
+  if(S.adminFoto){ av.style.display=''; av.innerHTML='<img src="'+escAttr(S.adminFoto)+'" alt="">'; }
+  else if(S.adminUser){ av.style.display=''; av.innerHTML=''; av.textContent=(String(S.adminUser)[0]||'A').toUpperCase(); }
+  else av.style.display='none';
+}
+function validarAdmin(){
+  var u=String($('adminUser').value||'').trim();
+  var s=String($('adminInput').value||'').trim();
+  if(!u||!s){ $('admin-erro').textContent='Preencha usuário e senha'; return; }
+  loader(true); $('admin-erro').textContent='';
+  server('adminLogin', u, s).then(function(res){
+    if(!(res&&res.ok)){ loader(false); $('admin-erro').textContent=(res&&res.erro)||'Usuário ou senha incorretos'; $('adminInput').value=''; if(navigator.vibrate)navigator.vibrate(120); return; }
+    S.adminUser=res.user||u; S.adminSenha=s; S.adminToken=res.token||''; S.adminFoto=res.foto||'';
+    $('adminUser').value=''; $('adminInput').value='';
+    server('adminListar', S.adminToken).then(function(r2){
+      loader(false);
+      S.adminFuncs=(r2&&r2.funcionarios)||[]; atualizarAdminHeader(); show('adminmenu');
+      server('adminCorrecoes',S.adminToken).then(function(r){ if(r&&r.ok) atualizarBadgeCorr((r.correcoes||[]).length); }).catch(function(){});
+    }).catch(function(){ loader(false); S.adminFuncs=[]; atualizarAdminHeader(); show('adminmenu'); });
+  }).catch(function(){ loader(false); $('admin-erro').textContent='Falha ao entrar'; });
+}
+function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function renderAdmin(list){
+  var box=$('admin-list'); box.innerHTML='';
+  (list||[]).forEach(function(f,idx){
+    if(f.foto) S.fotos[f.id]=f.foto;
+    var cor=corDe(idx), foto=f.foto||S.fotos[f.id];
+    var row=document.createElement('div'); row.className='admin-row';
+    row.innerHTML='<button class="ar-av" style="border-color:'+cor+';color:'+cor+'" title="Trocar foto de perfil">'+(foto?'<img src="'+escAttr(foto)+'" alt="">':escAttr(iniciais(f.nome)))+'</button>'+
+      '<input class="an-nome" type="text" value="'+escAttr(f.nome)+'">'+
+      '<input class="an-pin" type="text" inputmode="numeric" maxlength="4" value="'+escAttr(f.pin)+'">'+
+      '<button class="bio'+(f.temBio?' on':'')+'" title="'+(f.temBio?'Biometria cadastrada (toque p/ refazer)':'Cadastrar biometria')+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="10.5" r="1.8"/><path d="M8.6 16c.5-1.6 1.9-2.6 3.4-2.6s2.9 1 3.4 2.6"/></svg></button>'+
+      '<button class="save" title="Salvar"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></button>'+
+      '<button class="rm" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>';
+    var inNome=row.querySelector('.an-nome'), inPin=row.querySelector('.an-pin');
+    inPin.addEventListener('input',function(){ inPin.value=inPin.value.replace(/\D/g,'').slice(0,4); });
+    row.querySelector('.ar-av').addEventListener('click',function(){ abrirFotoColab(f.id, f.nome); });
+    row.querySelector('.bio').addEventListener('click',function(){ abrirBio(f.id, f.nome); });
+    row.querySelector('.save').addEventListener('click',function(){ salvarColab(f, inNome.value, inPin.value); });
+    row.querySelector('.rm').addEventListener('click',function(){ removerColab(f.id, f.nome); });
+    box.appendChild(row);
+  });
+}
+function salvarColab(f, nome, pin){
+  nome=String(nome||'').trim(); pin=String(pin||'').trim();
+  if(nome.length<2){ toast('Informe o nome',true); return; }
+  if(!/^\d{4}$/.test(pin)){ toast('O PIN deve ter 4 números',true); return; }
+  var tarefas=[];
+  if(nome!==f.nome) tarefas.push(server('adminSalvarNome', S.adminToken, f.id, nome));
+  if(pin!==f.pin) tarefas.push(server('adminSalvarPin', S.adminToken, f.id, pin));
+  if(!tarefas.length){ toast('Nada mudou'); return; }
+  loader(true);
+  Promise.all(tarefas).then(function(res){
+    loader(false);
+    var err=res.filter(function(r){return r && !r.ok;})[0];
+    if(err){ toast(err.erro||'Erro ao salvar',true); return; }
+    toast(nome+' salvo'); recarregarAdmin();
+  }).catch(function(){ loader(false); toast('Falha ao salvar',true); });
+}
+function removerColab(id, nome){
+  confirmarModal('Remover '+nome+'?', 'Os dados dele ficam arquivados (aba oculta), mas ele sai da lista de batida.', function(){
+    loader(true);
+    server('adminRemover', S.adminToken, id).then(function(res){
+      loader(false);
+      if(res && res.ok){ toast(nome+' removido'); renderAdmin(res.funcionarios); }
+      else { toast((res&&res.erro)||'Erro ao remover',true); }
+    }).catch(function(){ loader(false); toast('Falha ao remover',true); });
+  });
+}
+function cadastrarColab(){
+  var nome=String($('novo-nome').value||'').trim(), pin=String($('novo-pin').value||'').trim();
+  if(nome.length<2){ toast('Informe o nome',true); return; }
+  if(!/^\d{4}$/.test(pin)){ toast('O PIN deve ter 4 números',true); return; }
+  loader(true);
+  server('adminCadastrar', S.adminToken, nome, pin).then(function(res){
+    loader(false);
+    if(res && res.ok){ toast(nome+' cadastrado'); $('novo-nome').value=''; $('novo-pin').value=''; $('admin-novo').classList.remove('show'); renderAdmin(res.funcionarios); }
+    else { toast((res&&res.erro)||'Erro ao cadastrar',true); }
+  }).catch(function(){ loader(false); toast('Falha ao cadastrar',true); });
+}
+function recarregarAdmin(){ server('adminListar', S.adminToken).then(function(res){ if(res&&res.ok) renderAdmin(res.funcionarios); }); }
+function abrirBio(id, nome){ S.bioTarget=id; abrirSheet('Biometria de '+nome, function(){ abrirCameraCaptura('Foto para biometria', function(d){ processarBio(d); }, 'admin'); }, function(){$('bioFile').click();}); }
+function receberBioFoto(e){ var file=e.target.files[0]; if(!file) return; e.target.value=''; var reader=new FileReader(); reader.onload=function(ev){ processarBio(ev.target.result); }; reader.readAsDataURL(file); }
+function processarBio(dataUrl){
+  loader(true);
+  descritorDaFoto(dataUrl).then(function(desc){
+    if(!desc){ loader(false); toast('Nenhum rosto detectado. Use uma foto nítida, de frente.',true); return; }
+    // a MESMA foto vira a foto de perfil (reduzida) do colaborador
+    redimensionarFoto(dataUrl, function(small){
+      server('adminSalvarBio', S.adminToken, S.bioTarget, desc, small).then(function(res){
+        loader(false);
+        if(res && res.ok){ if(res.foto) S.fotos[S.bioTarget]=res.foto; toast('Biometria e foto cadastradas'); recarregarAdmin(); }
+        else { toast((res&&res.erro)||'Erro ao salvar biometria',true); }
+      }).catch(function(){ loader(false); toast('Falha ao salvar',true); });
+    });
+  }).catch(function(){ loader(false); toast('Não carregou o reconhecimento facial (verifique a internet)',true); });
+}
+function confirmarModal(titulo, sub, onYes){
+  modal('<div class="m-tit">'+titulo+'</div><div class="m-sub">'+sub+'</div>'+
+    '<button class="m-btn" id="cf-yes" style="background:'+'#f1516f'+'">Sim</button>'+
+    '<button class="m-btn" id="cf-no" style="background:#e8e8e8;color:#333;margin-top:8px">Cancelar</button>','erro');
+  setTimeout(function(){
+    var y=$('cf-yes'), n=$('cf-no');
+    if(y) y.addEventListener('click',function(){ fecharModal(); onYes(); });
+    if(n) n.addEventListener('click',fecharModal);
+  },30);
+}
+
+/* ================= ADMIN MENU + CORREÇÕES ================= */
+function abrirAdminMenu(am){
+  if(am==='colab'){ renderAdmin(S.adminFuncs||[]); show('admin'); recarregarAdmin(); }
+  else if(am==='corr'){ carregarCorrecoes(); }
+  else if(am==='rel'){ carregarRelatorio(); }
+  else if(am==='cfg'){ carregarConfig(); }
+  else if(am==='fer'){ carregarFeriados(); }
+  else { toast('Em breve, na próxima fase'); }
+}
+function atualizarBadgeCorr(n){ var b=$('corr-badge'); if(!b) return; if(n>0){ b.textContent=n; b.classList.add('show'); } else b.classList.remove('show'); }
+function carregarCorrecoes(){
+  show('admincorr'); loader(true); $('corr-list').innerHTML='<div class="corr-vazio"><div class="spin" style="margin:0 auto"></div></div>';
+  server('adminCorrecoes', S.adminToken).then(function(res){
+    loader(false);
+    if(res && res.ok){ renderCorrecoes(res.correcoes||[]); }
+    else { toast((res&&res.erro)||'Erro',true); $('corr-list').innerHTML=''; }
+  }).catch(function(){ loader(false); $('corr-list').innerHTML='<div class="corr-vazio">Falha ao carregar.</div>'; });
+}
+function renderCorrecoes(list){
+  atualizarBadgeCorr(list.length);
+  var box=$('corr-list'); box.innerHTML='';
+  if(!list.length){ box.innerHTML='<div class="corr-vazio"><div class="big">✓</div>Nenhuma correção pendente.</div>'; return; }
+  list.forEach(function(c){
+    var card=document.createElement('div'); card.className='corr-card';
+    var link=c.comprovante?'<a class="clink" href="'+escAttr(c.comprovante)+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Ver comprovante</a>':'';
+    card.innerHTML='<div class="ch"><span class="cn">'+escAttr(c.func)+'</span><span class="cd">'+escAttr(c.ts)+'</span></div>'+
+      '<div class="cinfo">Dia <b>'+escAttr(c.dia)+'</b> &middot; <b>'+escAttr(c.periodo)+'</b> para <b>'+escAttr(c.horario)+'</b></div>'+
+      '<div class="cmot">'+escAttr(c.motivo||'(sem motivo)')+'</div>'+link+
+      '<div class="cbtns"><button class="crep">Reprovar</button><button class="capr">Aprovar</button></div>';
+    card.querySelector('.capr').addEventListener('click',function(){ resolverCorrecao(c.row, true); });
+    card.querySelector('.crep').addEventListener('click',function(){ resolverCorrecao(c.row, false); });
+    box.appendChild(card);
+  });
+}
+function resolverCorrecao(row, aprovar){
+  loader(true);
+  server('adminResolverCorrecao', S.adminToken, row, aprovar).then(function(res){
+    loader(false);
+    if(res && res.ok){ toast(aprovar?'Correção aprovada':'Correção reprovada'); renderCorrecoes(res.correcoes||[]); }
+    else { toast((res&&res.erro)||'Erro',true); }
+  }).catch(function(){ loader(false); toast('Falha',true); });
+}
+
+/* ---- Relatório de ponto ---- */
+function carregarRelatorio(){
+  show('adminrel'); loader(true); $('rel-list').innerHTML='<div class="corr-vazio"><div class="spin" style="margin:0 auto"></div></div>';
+  server('adminRelatorio', S.adminToken).then(function(res){
+    loader(false);
+    if(res && res.ok){ $('rel-mes').textContent=res.mes||'Mês atual'; renderRelatorio(res.funcionarios||[]); }
+    else { toast((res&&res.erro)||'Erro',true); $('rel-list').innerHTML=''; }
+  }).catch(function(){ loader(false); $('rel-list').innerHTML='<div class="corr-vazio">Falha ao carregar.</div>'; });
+}
+function renderRelatorio(list){
+  var box=$('rel-list'); box.innerHTML='';
+  if(!list.length){ box.innerHTML='<div class="corr-vazio">Nenhum colaborador.</div>'; return; }
+  list.forEach(function(f){
+    var neg=(f.saldoMin||0)<0, sc=neg?'sneg':((f.saldoMin||0)>0?'spos':'szero');
+    var card=document.createElement('button'); card.className='rel-card';
+    card.innerHTML='<span class="rl-nome">'+escAttr(f.nome)+'</span>'+
+      '<span class="rl-mid"><span class="rl-h">'+escAttr(f.horas)+'</span><span class="rl-d">'+escAttr(f.dias)+' dias</span></span>'+
+      '<span class="rl-saldo '+sc+'">'+escAttr(f.saldo)+'</span>'+
+      '<svg class="rl-arw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+    card.addEventListener('click',function(){ abrirRelatorioFunc(f.id); });
+    box.appendChild(card);
+  });
+}
+function abrirRelatorioFunc(id){
+  show('adminreldet'); loader(true);
+  $('reld-kpis').innerHTML=''; $('reld-wrap').innerHTML='<div class="corr-vazio"><div class="spin" style="margin:0 auto"></div></div>';
+  server('adminRelatorioFunc', S.adminToken, id).then(function(res){
+    loader(false);
+    if(res && res.ok){ renderRelatorioDet(res); }
+    else { toast((res&&res.erro)||'Erro',true); show('adminrel'); }
+  }).catch(function(){ loader(false); $('reld-wrap').innerHTML='<div class="corr-vazio">Falha ao carregar.</div>'; });
+}
+function renderRelatorioDet(r){
+  $('reld-nome').textContent=r.nome||'Colaborador';
+  $('reld-mes').textContent=r.mes||'';
+  var neg=String(r.totalSaldo||'').indexOf('-')===0, pos=String(r.totalSaldo||'').indexOf('+')===0 && r.totalSaldo!=='+0:00';
+  $('reld-kpis').innerHTML=
+    '<div class="rk"><span class="rk-v">'+escAttr(r.totalHoras)+'</span><span class="rk-l">Horas no mês</span></div>'+
+    '<div class="rk"><span class="rk-v '+(neg?'sneg':(pos?'spos':''))+'">'+escAttr(r.totalSaldo)+'</span><span class="rk-l">Saldo</span></div>'+
+    '<div class="rk"><span class="rk-v">'+escAttr(r.dias)+'</span><span class="rk-l">Dias</span></div>';
+  var linhas=r.linhas||[];
+  if(!linhas.length){ $('reld-wrap').innerHTML='<div class="corr-vazio">Nenhuma batida neste mês.</div>'; return; }
+  var h='<table class="reld-tab"><thead><tr><th>Dia</th><th>Ent</th><th>Alm</th><th>Volta</th><th>Saída</th><th>Horas</th><th>Saldo</th></tr></thead><tbody>';
+  linhas.forEach(function(l){
+    var sn=String(l.saldo||'').indexOf('-')===0, sp=String(l.saldo||'').indexOf('+')===0;
+    h+='<tr><td class="td-d"><b>'+escAttr(l.data)+'</b><small>'+escAttr(l.dia)+'</small></td>'+
+      '<td>'+escAttr(l.entrada||'—')+'</td><td>'+escAttr(l.ini||'—')+'</td><td>'+escAttr(l.volta||'—')+'</td><td>'+escAttr(l.saida||'—')+'</td>'+
+      '<td class="td-h">'+escAttr(l.horas||'—')+'</td>'+
+      '<td class="'+(sn?'sneg':(sp?'spos':''))+'">'+escAttr(l.saldo||'—')+'</td></tr>';
+  });
+  h+='</tbody></table>';
+  $('reld-wrap').innerHTML=h;
+}
+
+/* ---- Configurações ---- */
+function minParaHM(min){ min=Math.max(0,Math.round(Number(min)||0)); var h=Math.floor(min/60), m=min%60; return (h<10?'0':'')+h+':'+(m<10?'0':'')+m; }
+function hmParaMin(str){ str=String(str||'').trim(); if(!str) return null;
+  if(str.indexOf(':')>=0){ var p=str.split(':'); var h=parseInt(p[0],10)||0, m=parseInt(p[1],10)||0; return h*60+m; }
+  var n=parseInt(str,10); return isNaN(n)?null:n*60; }
+function carregarConfig(){
+  show('admincfg'); loader(true);
+  $('cfg-senha1').value=''; $('cfg-senha2').value=''; $('cfg-senha-erro').textContent='';
+  server('adminConfig', S.adminToken).then(function(res){
+    loader(false);
+    if(res && res.ok){ renderConfig(res); }
+    else { toast((res&&res.erro)||'Erro',true); show('adminmenu'); }
+  }).catch(function(){ loader(false); toast('Falha ao carregar',true); show('adminmenu'); });
+}
+function renderConfig(c){
+  $('cfg-semana').value=minParaHM(c.jornadaSemana);
+  $('cfg-sabado').value=minParaHM(c.jornadaSabado);
+  $('cfg-tol').value=String(c.tolerancia);
+  $('cfg-almoco').value=String(c.almoco==null?120:c.almoco);
+  $('cfg-disp').textContent=c.dispositivo||'(nenhum registrado ainda)';
+  $('cfg-uname').textContent=S.adminUser||'—';
+  $('cfg-novouser').value='';
+  var uav=$('cfg-uav');
+  if(S.adminFoto){ uav.innerHTML='<img src="'+escAttr(S.adminFoto)+'" alt="">'; }
+  else { uav.innerHTML=''; uav.textContent=(String(S.adminUser)[0]||'A').toUpperCase(); }
+}
+function salvarConfig(){
+  var sem=hmParaMin($('cfg-semana').value), sab=hmParaMin($('cfg-sabado').value), tol=parseInt($('cfg-tol').value,10), alm=parseInt($('cfg-almoco').value,10);
+  if(sem===null||sab===null||isNaN(tol)){ toast('Preencha jornada e tolerância',true); return; }
+  if(isNaN(alm)) alm=120;
+  loader(true);
+  server('adminSalvarConfig', S.adminToken, {jornadaSemana:sem, jornadaSabado:sab, tolerancia:tol, almoco:alm}).then(function(res){
+    loader(false);
+    if(res && res.ok){ toast('Jornada salva e saldos recalculados'); renderConfig(res); }
+    else { toast((res&&res.erro)||'Erro',true); }
+  }).catch(function(){ loader(false); toast('Falha ao salvar',true); });
+}
+function trocarSenhaAdmin(){
+  var s1=String($('cfg-senha1').value||'').trim(), s2=String($('cfg-senha2').value||'').trim();
+  var er=$('cfg-senha-erro'); er.textContent='';
+  if(s1.length<4){ er.textContent='A nova senha precisa de pelo menos 4 caracteres.'; return; }
+  if(s1!==s2){ er.textContent='As senhas não são iguais.'; return; }
+  loader(true);
+  server('adminTrocarSenha', S.adminToken, S.adminSenha, s1).then(function(res){
+    loader(false);
+    if(res && res.ok){ S.adminSenha=s1; $('cfg-senha1').value=''; $('cfg-senha2').value=''; toast('Senha do admin trocada'); }
+    else { er.textContent=(res&&res.erro)||'Erro ao trocar'; }
+  }).catch(function(){ loader(false); toast('Falha ao trocar senha',true); });
+}
+function trocarUsuarioAdmin(){
+  var nu=String($('cfg-novouser').value||'').trim();
+  if(nu.length<3){ toast('Usuário precisa de ao menos 3 letras',true); return; }
+  loader(true);
+  server('adminTrocarUsuario', S.adminToken, S.adminSenha, nu).then(function(res){
+    loader(false);
+    if(res && res.ok){ S.adminUser=res.user||nu; $('cfg-novouser').value=''; $('cfg-uname').textContent=S.adminUser; atualizarAdminHeader(); toast('Usuário atualizado'); }
+    else { toast((res&&res.erro)||'Erro ao trocar usuário',true); }
+  }).catch(function(){ loader(false); toast('Falha',true); });
+}
+function trocarFotoUser(){
+  abrirFotoSheet('Foto do admin', function(dataUrl){
+    loader(true);
+    server('adminSalvarFotoUser', S.adminToken, dataUrl).then(function(res){
+      loader(false);
+      if(res && res.ok){ S.adminFoto=res.foto||dataUrl; $('cfg-uav').innerHTML='<img src="'+escAttr(S.adminFoto)+'" alt="">'; atualizarAdminHeader(); toast('Foto atualizada'); }
+      else { toast((res&&res.erro)||'Erro',true); }
+    }).catch(function(){ loader(false); toast('Falha ao salvar foto',true); });
+  }, 'admincfg');
+}
+/* ---- Foto de perfil (colaborador + admin): captura, redimensiona e envia ---- */
+var _fotoCb=null;
+function abrirFotoSheet(titulo, cb, retorno){ _fotoCb=cb;
+  abrirSheet(titulo, function(){ abrirCameraCaptura(titulo, function(d){ redimensionarFoto(d, function(small){ if(_fotoCb) _fotoCb(small); }); }, retorno||'admin'); }, function(){$('fotoFile').click();}); }
+function receberFotoPerfil(e){ var file=e.target.files[0]; if(!file){ return; } e.target.value=''; var r=new FileReader(); r.onload=function(ev){ redimensionarFoto(ev.target.result, function(small){ if(_fotoCb) _fotoCb(small); }); }; r.readAsDataURL(file); }
+function redimensionarFoto(dataUrl, done){
+  var img=new Image();
+  img.onload=function(){
+    function enc(max){
+      var w=img.width||max, h=img.height||max, s=Math.min(max/w, max/h, 1);
+      var cw=Math.max(1,Math.round(w*s)), ch=Math.max(1,Math.round(h*s));
+      var cv=document.createElement('canvas'); cv.width=cw; cv.height=ch;
+      cv.getContext('2d').drawImage(img,0,0,cw,ch);
+      var q=0.72, out=cv.toDataURL('image/jpeg',q);
+      while(out.length>44000 && q>0.34){ q-=0.12; out=cv.toDataURL('image/jpeg',q); }
+      return out;
+    }
+    var out=enc(220);                          // garante < 48000 chars (limite do backend/celula)
+    if(out.length>44000) out=enc(170);
+    if(out.length>44000) out=enc(130);
+    done(out);
+  };
+  img.onerror=function(){ loader(false); toast('Não consegui ler a imagem',true); };
+  img.src=dataUrl;
+}
+function abrirFotoColab(id, nome){
+  abrirFotoSheet('Foto de '+nome, function(dataUrl){
+    loader(true);
+    server('adminSalvarFotoPerfil', S.adminToken, id, dataUrl).then(function(res){
+      loader(false);
+      if(res && res.ok){ S.fotos[id]=res.foto||dataUrl; toast('Foto salva'); recarregarAdmin(); }
+      else { toast((res&&res.erro)||'Erro ao salvar foto',true); }
+    }).catch(function(){ loader(false); toast('Falha ao salvar foto',true); });
+  });
+}
+function resetarDispositivo(){
+  confirmarModal('Resetar dispositivo?', 'O próximo aparelho que bater o ponto vira o novo autorizado.', function(){
+    loader(true);
+    server('adminResetarDispositivo', S.adminToken).then(function(res){
+      loader(false);
+      if(res && res.ok){ $('cfg-disp').textContent=res.dispositivo||'(nenhum registrado ainda)'; toast('Dispositivo resetado'); }
+      else { toast((res&&res.erro)||'Erro',true); }
+    }).catch(function(){ loader(false); toast('Falha',true); });
+  });
+}
+
+/* ---- Feriados ---- */
+function carregarFeriados(){
+  show('adminfer'); loader(true); $('fer-list').innerHTML='<div class="corr-vazio"><div class="spin" style="margin:0 auto"></div></div>';
+  server('adminFeriados', S.adminToken).then(function(res){
+    loader(false);
+    if(res && res.ok){ renderFeriados(res.feriados||[]); }
+    else { toast((res&&res.erro)||'Erro',true); show('adminmenu'); }
+  }).catch(function(){ loader(false); $('fer-list').innerHTML='<div class="corr-vazio">Falha ao carregar.</div>'; });
+}
+function renderFeriados(list){
+  var box=$('fer-list'); box.innerHTML='';
+  if(!list.length){ box.innerHTML='<div class="corr-vazio">Nenhum feriado cadastrado.</div>'; return; }
+  list.forEach(function(f){
+    var row=document.createElement('div'); row.className='fer-row';
+    row.innerHTML='<span class="fr-data">'+escAttr(f.dataBr)+'</span><span class="fr-nome">'+escAttr(f.nome||'Feriado')+'</span>'+
+      '<button class="fr-rm" aria-label="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>';
+    row.querySelector('.fr-rm').addEventListener('click',function(){ removerFeriado(f.data, f.dataBr); });
+    box.appendChild(row);
+  });
+}
+function addFeriado(){
+  var data=String($('fer-data').value||'').trim(), nome=String($('fer-nome').value||'').trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(data)){ toast('Escolha a data do feriado',true); return; }
+  loader(true);
+  server('adminAddFeriado', S.adminToken, data, nome).then(function(res){
+    loader(false);
+    if(res && res.ok){ $('fer-data').value=''; $('fer-nome').value=''; toast('Feriado adicionado'); renderFeriados(res.feriados||[]); }
+    else { toast((res&&res.erro)||'Erro',true); }
+  }).catch(function(){ loader(false); toast('Falha',true); });
+}
+function removerFeriado(data, dataBr){
+  confirmarModal('Remover feriado '+dataBr+'?', 'O dia volta a contar jornada normal.', function(){
+    loader(true);
+    server('adminRemoverFeriado', S.adminToken, data).then(function(res){
+      loader(false);
+      if(res && res.ok){ toast('Feriado removido'); renderFeriados(res.feriados||[]); }
+      else { toast((res&&res.erro)||'Erro',true); }
+    }).catch(function(){ loader(false); toast('Falha',true); });
+  });
+}
+
+/* ================= EVENTOS ================= */
+document.addEventListener('click',function(e){
+  var eye=e.target.closest('[data-eye]'); if(eye){ var inp=$(eye.getAttribute('data-eye')); if(inp){ var ver=inp.type==='password'; inp.type=ver?'text':'password'; eye.classList.toggle('on',ver); } return; }
+  var am=e.target.closest('[data-am]'); if(am){ abrirAdminMenu(am.getAttribute('data-am')); return; }
+  var go=e.target.closest('[data-go]'); if(!go) return;
+  var dest=go.getAttribute('data-go');
+  if(dest==='home'){ S.func=null; S.pin=''; refreshPainel(false); }
+  if(dest==='hist'){ abrirHistorico(); return; }
+  if(dest==='corr'){ show('corr'); return; }
+  show(dest);
+});
+$('shutter').addEventListener('click',capturar);
+$('cam-repetir').addEventListener('click',repetirFoto);
+$('cam-ok').addEventListener('click',camOk);
+$('cam-back').addEventListener('click',function(){ pararCamera(); if(S.capMode){ S.capMode=false; show(S.capReturn); } else { show('func'); } });
+$('btn-file').addEventListener('click',function(){ $('fileInput').click(); });
+$('btn-corr').addEventListener('click',enviarCorrecao);
+$('btn-admin').addEventListener('click',abrirAdminLogin);
+$('btn-adminentrar').addEventListener('click',validarAdmin);
+$('adminInput').addEventListener('keydown',function(e){ if(e.key==='Enter') validarAdmin(); });
+$('adminUser').addEventListener('keydown',function(e){ if(e.key==='Enter'){ try{$('adminInput').focus();}catch(x){} } });
+$('btn-novo').addEventListener('click',function(){ var n=$('admin-novo'); n.classList.toggle('show'); if(n.classList.contains('show')) setTimeout(function(){try{$('novo-nome').focus();}catch(e){}},100); });
+$('novo-cancelar').addEventListener('click',function(){ $('admin-novo').classList.remove('show'); $('novo-nome').value=''; $('novo-pin').value=''; });
+$('novo-salvar').addEventListener('click',cadastrarColab);
+$('novo-pin').addEventListener('input',function(){ this.value=this.value.replace(/\D/g,'').slice(0,4); });
+$('cfg-salvar').addEventListener('click',salvarConfig);
+$('cfg-trocar').addEventListener('click',trocarSenhaAdmin);
+$('cfg-reset').addEventListener('click',resetarDispositivo);
+['cfg-semana','cfg-sabado'].forEach(function(id){ $(id).addEventListener('input',function(){ this.value=this.value.replace(/[^\d:]/g,'').slice(0,5); }); });
+$('cfg-tol').addEventListener('input',function(){ this.value=this.value.replace(/\D/g,'').slice(0,3); });
+$('cfg-almoco').addEventListener('input',function(){ this.value=this.value.replace(/\D/g,'').slice(0,3); });
+$('fer-add').addEventListener('click',addFeriado);
+
+/* anexo de comprovante na correção (mini menu: tirar foto OU escolher arquivo) */
+function limparAnexo(){ S.anexo=null; $('anexoCam').value=''; $('anexoFile').value=''; $('anexo-chip').classList.remove('show'); $('btn-anexo').style.display='flex'; }
+var _sheetCb={cam:null,file:null};
+function abrirSheet(titulo,onCam,onFile){ var t=$('anexo-sheet').querySelector('.sheet-title'); if(t&&titulo)t.textContent=titulo; _sheetCb.cam=onCam||null; _sheetCb.file=onFile||null; $('anexo-sheet').classList.add('show'); }
+function fecharSheet(){ $('anexo-sheet').classList.remove('show'); }
+/* ===== reconhecimento facial (face-api.js, carregado sob demanda do CDN) ===== */
+var _faceReady=null;
+function carregarFaceApi(){
+  if(_faceReady) return _faceReady;
+  _faceReady=new Promise(function(resolve,reject){
+    if(window.faceapi){ resolve(true); return; }
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js';
+    s.onload=function(){
+      var M='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+      Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(M),faceapi.nets.faceLandmark68Net.loadFromUri(M),faceapi.nets.faceRecognitionNet.loadFromUri(M)])
+        .then(function(){ resolve(true); }).catch(reject);
+    };
+    s.onerror=function(){ reject(new Error('cdn')); };
+    document.head.appendChild(s);
+  });
+  return _faceReady;
+}
+// dataURL -> assinatura do rosto (array de 128 nums) ou null se não achar rosto
+function descritorDaFoto(dataUrl){
+  return carregarFaceApi().then(function(){
+    return new Promise(function(resolve){
+      var img=new Image();
+      img.onload=function(){
+        faceapi.detectSingleFace(img,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:0.4})).withFaceLandmarks().withFaceDescriptor()
+          .then(function(det){ resolve(det?Array.prototype.slice.call(det.descriptor):null); }).catch(function(){ resolve(null); });
+      };
+      img.onerror=function(){ resolve(null); };
+      img.src=dataUrl;
+    });
+  });
+}
+// distância euclidiana entre duas assinaturas (menor = mais parecido)
+function distanciaRosto(a,b){ if(!a||!b||a.length!==b.length) return 99; var s=0; for(var i=0;i<a.length;i++){ var d=a[i]-b[i]; s+=d*d; } return Math.sqrt(s); }
+function receberAnexo(e){
+  var file=e.target.files[0]; if(!file) return;
+  if(file.size > 8*1024*1024){ toast('Arquivo muito grande (máx 8MB)',true); e.target.value=''; return; }
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    S.anexo={dataUrl:ev.target.result, nome:file.name||'foto.jpg', mime:file.type||'application/octet-stream'};
+    $('anexo-nome').textContent=file.name||'foto.jpg';
+    $('anexo-chip').classList.add('show'); $('btn-anexo').style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+$('btn-anexo').addEventListener('click',function(){ abrirSheet('Anexar comprovante', function(){$('anexoCam').click();}, function(){$('anexoFile').click();}); });
+$('anexo-rm').addEventListener('click',limparAnexo);
+$('op-cam').addEventListener('click',function(){ fecharSheet(); if(_sheetCb.cam)_sheetCb.cam(); });
+$('op-file').addEventListener('click',function(){ fecharSheet(); if(_sheetCb.file)_sheetCb.file(); });
+$('op-cancel').addEventListener('click',fecharSheet);
+$('anexo-sheet').addEventListener('click',function(e){ if(e.target===this) fecharSheet(); });
+$('anexoCam').addEventListener('change',receberAnexo);
+$('anexoFile').addEventListener('change',receberAnexo);
+$('bioCam').addEventListener('change',receberBioFoto);
+$('bioFile').addEventListener('change',receberBioFoto);
+$('fotoCam').addEventListener('change',receberFotoPerfil);
+$('fotoFile').addEventListener('change',receberFotoPerfil);
+$('cfg-trocaruser').addEventListener('click',trocarUsuarioAdmin);
+$('cfg-userfoto').addEventListener('click',trocarFotoUser);
+
+/* ================= START ================= */
+iniciar();
+</script>
+</body>
+</html>
