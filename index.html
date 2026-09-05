@@ -552,7 +552,7 @@
       </div>
       <div class="campo">
         <label>Horário correto</label>
-        <input type="text" id="c-hora" placeholder="Ex: 08:00" inputmode="numeric">
+        <input type="time" id="c-hora" step="60">
       </div>
       <div class="campo">
         <label>Motivo</label>
@@ -670,11 +670,16 @@
       <div class="cfg-erro" id="cfg-senha-erro"></div>
       <button class="btn btn-ghost" id="cfg-trocar">Trocar senha</button>
     </div>
-    <div class="cfg-sec">Dispositivo autorizado</div>
+    <div class="cfg-sec">Aparelhos autorizados</div>
     <div class="cfg-card">
-      <div class="cfg-disp" id="cfg-disp">—</div>
-      <div class="cfg-hint">O 1º aparelho que bater vira o autorizado. Se outro bater, o ponto entra marcado como suspeito (vermelho na planilha) — não é bloqueado. Resetar limpa o autorizado: o próximo a bater vira o novo.</div>
-      <button class="btn btn-ghost cfg-danger" id="cfg-reset">Resetar dispositivo</button>
+      <div id="cfg-disp-lista"></div>
+      <div class="cfg-hint">Só os aparelhos desta lista batem sem alerta. Quem bate fora dela fica vermelho na planilha (não bloqueia). Cadastre cada celular oficial da empresa.</div>
+      <button class="btn btn-primary" id="cfg-disp-add" style="margin-top:4px">Autorizar este aparelho</button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input type="text" id="cfg-disp-id" class="cfg-inp" placeholder="Colar o ID de um aparelho" autocapitalize="none" autocorrect="off" spellcheck="false" style="flex:1;margin:0">
+        <button class="btn btn-ghost" id="cfg-disp-addid" style="width:auto;padding:0 14px">Autorizar</button>
+      </div>
+      <button class="btn btn-ghost cfg-danger" id="cfg-reset" style="margin-top:8px">Limpar lista</button>
     </div>
   </section>
 
@@ -842,10 +847,12 @@ var MOCK = {
     {data:'21/08',dia:'Qui',entrada:'08:00',ini:'12:00',volta:'14:00',saida:'18:00',horas:'8:00',saldo:'00:00'},
     {data:'20/08',dia:'Qua',entrada:'08:15',ini:'12:00',volta:'14:00',saida:'18:00',horas:'7:45',saldo:'-0:15'}
   ]}; },
-  adminConfig:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,jornadaSemana:480,jornadaSabado:240,tolerancia:15,almoco:120,dispositivo:'exemplo-uuid-1234'}; },
-  adminSalvarConfig:function(senha,cfg){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,jornadaSemana:cfg.jornadaSemana,jornadaSabado:cfg.jornadaSabado,tolerancia:cfg.tolerancia,almoco:cfg.almoco,dispositivo:'exemplo-uuid-1234'}; },
+  adminConfig:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,jornadaSemana:480,jornadaSabado:240,tolerancia:0,almoco:120,dispositivos:[{id:'exemplo-uuid-1234',nome:'Aparelho 1'}]}; },
+  adminSalvarConfig:function(senha,cfg){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,jornadaSemana:cfg.jornadaSemana,jornadaSabado:cfg.jornadaSabado,tolerancia:cfg.tolerancia,almoco:cfg.almoco,dispositivos:[{id:'exemplo-uuid-1234',nome:'Aparelho 1'}]}; },
+  adminAutorizarDispositivo:function(t,id,nome){ return {ok:true,dispositivos:[{id:'exemplo-uuid-1234',nome:'Aparelho 1'},{id:id,nome:nome||'Aparelho 2'}]}; },
+  adminRemoverDispositivo:function(t,id){ return {ok:true,dispositivos:[{id:'exemplo-uuid-1234',nome:'Aparelho 1'}]}; },
   adminTrocarSenha:function(user,senhaAtual,nova){ if(!senhaAtual) return {ok:false,erro:'Senha atual incorreta'}; return {ok:true}; },
-  adminResetarDispositivo:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,dispositivo:'(nenhum registrado ainda)'}; },
+  adminResetarDispositivo:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,dispositivos:[]}; },
   adminFeriados:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,feriados:[{data:'2026-09-07',nome:'Independência',dataBr:'07/09/2026'}]}; },
   adminAddFeriado:function(senha,data,nome){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,feriados:[{data:'2026-09-07',nome:'Independência',dataBr:'07/09/2026'},{data:data,nome:nome||'Feriado',dataBr:String(data).split('-').reverse().join('/')}]}; },
   adminRemoverFeriado:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,feriados:[]}; },
@@ -968,13 +975,16 @@ function abrirFunc(){
 function renderPassos(){
   var box=$('passos'); box.innerHTML='';
   var seq=S.estado.sequencia, feitos=S.estado.feitos, prox=S.estado.proximo;
+  var pulouIntervalo = (prox==='completo' && feitos.saida && !feitos.ini_intervalo && !feitos.volta_intervalo);
   seq.forEach(function(tp){
     var feito=!!feitos[tp], atual=(tp===prox);
+    var pest=feito?'Registrado':TIPO_EST[tp], phora=feito?feitos[tp]:(atual?'agora':'—');
+    if(!feito && pulouIntervalo && (tp==='ini_intervalo'||tp==='volta_intervalo')){ pest='Sem intervalo'; phora='—'; } // turno sem almoço
     var el=document.createElement('div');
     el.className='passo '+(feito?'feito':(atual?'atual':'futuro'));
     el.innerHTML='<div class="ic">'+(feito?CHECK_SVG:TIPO_SVG[tp])+'</div>'+
-      '<div class="txt"><div class="p-nome">'+TIPO_LABEL[tp]+'</div><div class="p-est">'+(feito?'Registrado':TIPO_EST[tp])+'</div></div>'+
-      '<div class="p-hora">'+(feito?feitos[tp]:(atual?'agora':'—'))+'</div>';
+      '<div class="txt"><div class="p-nome">'+TIPO_LABEL[tp]+'</div><div class="p-est">'+pest+'</div></div>'+
+      '<div class="p-hora">'+phora+'</div>';
     box.appendChild(el);
   });
   // botão principal
@@ -986,6 +996,15 @@ function renderPassos(){
     b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2.4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z" stroke-linejoin="round"/><circle cx="12" cy="13" r="4"/></svg> Bater '+TIPO_LABEL[prox];
     b.addEventListener('click',function(){ abrirCamera(prox) });
     wrap.appendChild(b);
+    // turno parcial: com Entrada batida e sem Saída, deixa fechar o dia direto na Saída (trabalhou só um turno)
+    if(feitos.entrada && !feitos.saida && !feitos.ini_intervalo && seq.indexOf('ini_intervalo')>=0){
+      var bs=document.createElement('button'); bs.className='btn btn-ghost'; bs.style.marginTop='8px';
+      bs.textContent='Trabalhei sem intervalo · bater Saída';
+      bs.addEventListener('click',function(){
+        confirmarModal('Fechar o dia sem intervalo?', 'Bate a Saída agora e encerra o dia sem registrar almoço. Use quando você trabalhou só um turno (manhã ou tarde).', function(){ abrirCamera('saida'); });
+      });
+      wrap.appendChild(bs);
+    }
   }
   box.appendChild(wrap);
 }
@@ -1001,10 +1020,10 @@ function iniciarCronometro(){
     var ent=parseHoje(f.entrada), ini=parseHoje(f.ini_intervalo), vol=parseHoje(f.volta_intervalo), sai=parseHoje(f.saida);
     var now=new Date().getTime(), base=0, run=null, intervalo=false;
     if(ent){
-      if(ini){ base+=ini-ent; } else { run=ent; }
-      if(ini&&vol){ if(sai){ base+=sai-vol; } else { run=vol; } }
-      else if(ini&&!vol){ intervalo=true; run=null; }
-      if(!ini&&sai){ base=sai-ent; run=null; }
+      if(sai){ base=sai-ent; if(ini&&vol) base-=(vol-ini); else if(ini&&!vol) base-=(sai-ini); run=null; intervalo=false; } // dia encerrado (desconta o intervalo; sem volta, nao conta o pos-almoco)
+      else if(ini&&vol){ base=ini-ent; run=vol; }         // voltou do intervalo, contando a tarde
+      else if(ini&&!vol){ base=ini-ent; intervalo=true; run=null; } // pausado no intervalo
+      else { run=ent; }                                    // contando desde a entrada
     }
     var ms=base+(run?now-run:0); if(ms<0)ms=0;
     var totS=Math.floor(ms/1000), h=Math.floor(totS/3600), mn=Math.floor((totS%3600)/60), sc=totS%60;
@@ -1146,6 +1165,7 @@ function tentarBioDeNovo(){ fecharModal(); repetirFoto(); if(!S.camStream) inici
 function fecharModalBio(){ fecharModal(); show('func'); }
 function recalcProximo(){
   S.estado.proximo='completo';
+  if(S.estado.feitos.saida) return;               // Saída batida = dia fechado (intervalo é opcional)
   for(var i=0;i<S.estado.sequencia.length;i++){ var t=S.estado.sequencia[i]; if(!S.estado.feitos[t]){ S.estado.proximo=t; break; } }
 }
 function modalSucesso(res){
@@ -1431,7 +1451,7 @@ function renderConfig(c){
   $('cfg-sabado').value=minParaHM(c.jornadaSabado);
   $('cfg-tol').value=String(c.tolerancia);
   $('cfg-almoco').value=String(c.almoco==null?120:c.almoco);
-  $('cfg-disp').textContent=c.dispositivo||'(nenhum registrado ainda)';
+  renderDispositivos(c.dispositivos);
   $('cfg-uname').textContent=S.adminUser||'—';
   $('cfg-novouser').value='';
   var uav=$('cfg-uav');
@@ -1516,12 +1536,55 @@ function abrirFotoColab(id, nome){
     }).catch(function(){ loader(false); toast('Falha ao salvar foto',true); });
   });
 }
+function renderDispositivos(lista){
+  var box=$('cfg-disp-lista'); if(!box) return;
+  lista=lista||[]; box.innerHTML='';
+  if(!lista.length){ box.innerHTML='<div class="cfg-disp">Nenhum aparelho autorizado ainda. O primeiro que bater entra sozinho, ou cadastre aqui.</div>'; return; }
+  lista.forEach(function(d){
+    var meu=(String(d.id)===String(S.deviceId))?' · este aparelho':'';
+    var row=document.createElement('div'); row.className='cfg-disp';
+    row.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:6px';
+    row.innerHTML='<div style="flex:1;min-width:0"><div style="font-weight:700">'+escAttr(d.nome||'Aparelho')+meu+'</div><div style="opacity:.65;font-size:11px;word-break:break-all">'+escAttr(d.id)+'</div></div>';
+    var rm=document.createElement('button'); rm.className='btn btn-ghost'; rm.style.cssText='width:auto;padding:0 12px'; rm.textContent='Remover';
+    rm.addEventListener('click',function(){ removerDispositivo(d.id, d.nome); });
+    row.appendChild(rm); box.appendChild(row);
+  });
+}
+function autorizarEsteAparelho(){
+  var nome=prompt('Nome pra este aparelho (ex: Celular da recepção):',''); if(nome===null) return;
+  loader(true);
+  server('adminAutorizarDispositivo', S.adminToken, S.deviceId, nome).then(function(res){
+    loader(false);
+    if(res && res.ok){ renderDispositivos(res.dispositivos); toast(res.jaExistia?'Este aparelho já estava autorizado':'Aparelho autorizado'); }
+    else toast((res&&res.erro)||'Erro',true);
+  }).catch(function(){ loader(false); toast('Falha',true); });
+}
+function autorizarPorId(){
+  var id=$('cfg-disp-id').value.trim(); if(!id){ toast('Cole o ID do aparelho',true); return; }
+  var nome=prompt('Nome pra este aparelho:',''); if(nome===null) return;
+  loader(true);
+  server('adminAutorizarDispositivo', S.adminToken, id, nome).then(function(res){
+    loader(false);
+    if(res && res.ok){ $('cfg-disp-id').value=''; renderDispositivos(res.dispositivos); toast(res.jaExistia?'Já estava autorizado':'Aparelho autorizado'); }
+    else toast((res&&res.erro)||'Erro',true);
+  }).catch(function(){ loader(false); toast('Falha',true); });
+}
+function removerDispositivo(id, nome){
+  confirmarModal('Remover aparelho?', (nome||'Este aparelho')+' deixa de ser autorizado. As batidas dele passam a ficar vermelhas.', function(){
+    loader(true);
+    server('adminRemoverDispositivo', S.adminToken, id).then(function(res){
+      loader(false);
+      if(res && res.ok){ renderDispositivos(res.dispositivos); toast('Aparelho removido'); }
+      else toast((res&&res.erro)||'Erro',true);
+    }).catch(function(){ loader(false); toast('Falha',true); });
+  });
+}
 function resetarDispositivo(){
-  confirmarModal('Resetar dispositivo?', 'O próximo aparelho que bater o ponto vira o novo autorizado.', function(){
+  confirmarModal('Limpar lista de aparelhos?', 'Remove todos os autorizados. O próximo aparelho que bater o ponto vira o primeiro autorizado de novo.', function(){
     loader(true);
     server('adminResetarDispositivo', S.adminToken).then(function(res){
       loader(false);
-      if(res && res.ok){ $('cfg-disp').textContent=res.dispositivo||'(nenhum registrado ainda)'; toast('Dispositivo resetado'); }
+      if(res && res.ok){ renderDispositivos(res.dispositivos); toast('Lista limpa'); }
       else { toast((res&&res.erro)||'Erro',true); }
     }).catch(function(){ loader(false); toast('Falha',true); });
   });
@@ -1596,6 +1659,8 @@ $('novo-pin').addEventListener('input',function(){ this.value=this.value.replace
 $('cfg-salvar').addEventListener('click',salvarConfig);
 $('cfg-trocar').addEventListener('click',trocarSenhaAdmin);
 $('cfg-reset').addEventListener('click',resetarDispositivo);
+$('cfg-disp-add').addEventListener('click',autorizarEsteAparelho);
+$('cfg-disp-addid').addEventListener('click',autorizarPorId);
 ['cfg-semana','cfg-sabado'].forEach(function(id){ $(id).addEventListener('input',function(){ this.value=this.value.replace(/[^\d:]/g,'').slice(0,5); }); });
 $('cfg-tol').addEventListener('input',function(){ this.value=this.value.replace(/\D/g,'').slice(0,3); });
 $('cfg-almoco').addEventListener('input',function(){ this.value=this.value.replace(/\D/g,'').slice(0,3); });
