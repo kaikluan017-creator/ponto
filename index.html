@@ -1071,9 +1071,10 @@ function camOk(){
   } else { confirmarPonto(); }
 }
 function iniciarCamera(){
+  pararCamera(); // libera a câmera anterior antes de reabrir (essencial no PWA do iOS: senão a 2ª pessoa pega tela preta)
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ modoArquivo(); return; }
   navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:720},height:{ideal:720}},audio:false})
-    .then(function(stream){ S.camStream=stream; var v=$('video'); v.srcObject=stream; v.play(); })
+    .then(function(stream){ S.camStream=stream; var v=$('video'); v.srcObject=stream; v.setAttribute('playsinline',''); v.muted=true; var p=v.play(); if(p&&p.catch)p.catch(function(){}); })
     .catch(function(){ modoArquivo(); });
 }
 function modoArquivo(){
@@ -1082,7 +1083,8 @@ function modoArquivo(){
   $('shutter').style.display='none';
 }
 function pararCamera(){
-  if(S.camStream){ S.camStream.getTracks().forEach(function(t){t.stop()}); S.camStream=null; }
+  try{ var v=$('video'); if(v){ v.pause(); v.srcObject=null; } }catch(e){} // zera o srcObject: libera a câmera de verdade no iOS PWA
+  if(S.camStream){ try{ S.camStream.getTracks().forEach(function(t){t.stop()}); }catch(e){} S.camStream=null; }
 }
 function capturar(){
   var v=$('video');
