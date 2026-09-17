@@ -232,6 +232,7 @@
   .fer-add{display:flex;flex-direction:column;gap:10px}
   .fer-inp{width:100%;height:46px;background:#0d0d0d;border:1px solid var(--linha);border-radius:11px;color:#fff;font-size:15px;padding:0 14px}
   .fer-inp:focus{border-color:var(--lima);outline:none}
+  select.fer-inp{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7075' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 13px center;padding-right:38px}
   .fer-date{font-family:'Sora';font-variant-numeric:tabular-nums}
   .fer-date::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.55;cursor:pointer}
   .fer-list{display:flex;flex-direction:column;gap:9px;padding-bottom:24px}
@@ -606,6 +607,7 @@
       <button class="amenu" data-am="rel"><span class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="atx"><b>Relatório de ponto</b><small>Horas e saldo de cada um</small></span><svg class="achev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="amenu" data-am="cfg"><span class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 6.6 19.4a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.8 2 2 0 1 1 3 9.8h.1A1.6 1.6 0 0 0 4.6 7.6a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 2.7-1.1V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1 2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></span><span class="atx"><b>Configurações</b><small>Senha, jornada, dispositivo</small></span><svg class="achev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="amenu" data-am="fer"><span class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="atx"><b>Feriados</b><small>Dias que não contam débito</small></span><svg class="achev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="amenu" data-am="abono"><span class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6a1 1 0 0 1 1 1v1h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1V4a1 1 0 0 1 1-1z"/><path d="M12 10v5M9.5 12.5h5"/></svg></span><span class="atx"><b>Faltas justificadas</b><small>Atestado médico: creditar o dia</small></span><svg class="achev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
   </section>
 
@@ -697,6 +699,28 @@
     <div class="cfg-hint" style="margin:10px 2px 14px">No feriado a jornada esperada é zero: quem não trabalha não fica devendo, e quem trabalha ganha as horas como extra. Ao adicionar ou remover, os saldos do mês são recalculados.</div>
     <div class="admin-sec">Feriados cadastrados</div>
     <div class="fer-list" id="fer-list"></div>
+  </section>
+
+  <!-- ============ ADMIN FALTAS JUSTIFICADAS (ABONOS) ============ -->
+  <section id="scr-adminabono" class="screen">
+    <div class="top">
+      <div class="back" data-go="adminmenu"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="h-nome">Faltas justificadas</div><div class="h-sub">Atestado médico e afins</div></div>
+    </div>
+    <div class="fer-add">
+      <select id="ab-func" class="fer-inp"></select>
+      <input type="date" id="ab-data" class="fer-inp fer-date">
+      <select id="ab-motivo" class="fer-inp">
+        <option value="Atestado médico">Atestado médico</option>
+        <option value="Falta justificada">Falta justificada</option>
+        <option value="Licença">Licença</option>
+        <option value="Declaração de comparecimento">Declaração de comparecimento</option>
+      </select>
+      <button class="btn btn-primary" id="ab-add">Abonar dia</button>
+    </div>
+    <div class="cfg-hint" style="margin:10px 2px 14px">O dia abonado conta como jornada cumprida (8:00 na semana, 4:00 no sábado) com saldo zero, no lugar da falta. Guarde o atestado em arquivo. Ao adicionar ou remover, os saldos do mês são recalculados.</div>
+    <div class="admin-sec">Dias abonados</div>
+    <div class="fer-list" id="ab-list"></div>
   </section>
 
   <!-- ============ ADMIN COLABORADORES ============ -->
@@ -856,6 +880,9 @@ var MOCK = {
   adminFeriados:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,feriados:[{data:'2026-09-07',nome:'Independência',dataBr:'07/09/2026'}]}; },
   adminAddFeriado:function(senha,data,nome){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,feriados:[{data:'2026-09-07',nome:'Independência',dataBr:'07/09/2026'},{data:data,nome:nome||'Feriado',dataBr:String(data).split('-').reverse().join('/')}]}; },
   adminRemoverFeriado:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,feriados:[]}; },
+  adminAbonos:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,abonos:[{id:'diego',nome:'Diego',data:'2026-09-14',dataBr:'14/09/2026',motivo:'Atestado médico'}]}; },
+  adminAddAbono:function(senha,id,data,motivo){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,abonos:[{id:id,nome:'Colaborador',data:data,dataBr:String(data).split('-').reverse().join('/'),motivo:motivo||'Atestado médico'}]}; },
+  adminRemoverAbono:function(senha){ if(!senha) return {ok:false,erro:'Senha incorreta'}; return {ok:true,abonos:[]}; },
   getHistorico:function(id){return {mes:'Agosto/2026', registros:[
     {data:'22/08',dia:'Sex',hora:'12:00',tipo:'Início do intervalo',status:'Registrado'},
     {data:'22/08',dia:'Sex',hora:'08:02',tipo:'Entrada',status:'Registrado'},
@@ -1344,6 +1371,7 @@ function abrirAdminMenu(am){
   else if(am==='rel'){ carregarRelatorio(); }
   else if(am==='cfg'){ carregarConfig(); }
   else if(am==='fer'){ carregarFeriados(); }
+  else if(am==='abono'){ carregarAbonos(); }
   else { toast('Em breve, na próxima fase'); }
 }
 function atualizarBadgeCorr(n){ var b=$('corr-badge'); if(!b) return; if(n>0){ b.textContent=n; b.classList.add('show'); } else b.classList.remove('show'); }
@@ -1633,6 +1661,54 @@ function removerFeriado(data, dataBr){
   });
 }
 
+/* ---- Faltas justificadas (abonos) ---- */
+function popularFuncSelect(){
+  var sel=$('ab-func'); if(!sel) return;
+  var funcs=S.adminFuncs||[];
+  sel.innerHTML = funcs.length ? funcs.map(function(f){ return '<option value="'+escAttr(f.id)+'">'+escAttr(f.nome)+'</option>'; }).join('') : '<option value="">Nenhum colaborador</option>';
+}
+function carregarAbonos(){
+  show('adminabono'); popularFuncSelect(); loader(true);
+  $('ab-list').innerHTML='<div class="corr-vazio"><div class="spin" style="margin:0 auto"></div></div>';
+  server('adminAbonos', S.adminToken).then(function(res){
+    loader(false);
+    if(res && res.ok){ renderAbonos(res.abonos||[]); }
+    else { toast((res&&res.erro)||'Erro',true); show('adminmenu'); }
+  }).catch(function(){ loader(false); $('ab-list').innerHTML='<div class="corr-vazio">Falha ao carregar.</div>'; });
+}
+function renderAbonos(list){
+  var box=$('ab-list'); box.innerHTML='';
+  if(!list.length){ box.innerHTML='<div class="corr-vazio">Nenhuma falta justificada cadastrada.</div>'; return; }
+  list.forEach(function(a){
+    var row=document.createElement('div'); row.className='fer-row';
+    row.innerHTML='<span class="fr-data">'+escAttr(a.dataBr)+'</span><span class="fr-nome">'+escAttr(a.nome)+' · '+escAttr(a.motivo||'Atestado médico')+'</span>'+
+      '<button class="fr-rm" aria-label="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>';
+    row.querySelector('.fr-rm').addEventListener('click',function(){ removerAbono(a.id, a.data, a.nome, a.dataBr); });
+    box.appendChild(row);
+  });
+}
+function addAbono(){
+  var id=String($('ab-func').value||''), data=String($('ab-data').value||'').trim(), motivo=String($('ab-motivo').value||'Atestado médico');
+  if(!id){ toast('Escolha o colaborador',true); return; }
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(data)){ toast('Escolha a data da falta',true); return; }
+  loader(true);
+  server('adminAddAbono', S.adminToken, id, data, motivo).then(function(res){
+    loader(false);
+    if(res && res.ok){ $('ab-data').value=''; toast('Falta justificada, dia creditado'); renderAbonos(res.abonos||[]); }
+    else { toast((res&&res.erro)||'Erro',true); }
+  }).catch(function(){ loader(false); toast('Falha',true); });
+}
+function removerAbono(id, data, nome, dataBr){
+  confirmarModal('Remover o abono de '+nome+' em '+dataBr+'?', 'O dia volta a ser tratado como falta.', function(){
+    loader(true);
+    server('adminRemoverAbono', S.adminToken, id, data).then(function(res){
+      loader(false);
+      if(res && res.ok){ toast('Abono removido'); renderAbonos(res.abonos||[]); }
+      else { toast((res&&res.erro)||'Erro',true); }
+    }).catch(function(){ loader(false); toast('Falha',true); });
+  });
+}
+
 /* ================= EVENTOS ================= */
 document.addEventListener('click',function(e){
   var eye=e.target.closest('[data-eye]'); if(eye){ var inp=$(eye.getAttribute('data-eye')); if(inp){ var ver=inp.type==='password'; inp.type=ver?'text':'password'; eye.classList.toggle('on',ver); } return; }
@@ -1667,6 +1743,7 @@ $('cfg-disp-addid').addEventListener('click',autorizarPorId);
 $('cfg-tol').addEventListener('input',function(){ this.value=this.value.replace(/\D/g,'').slice(0,3); });
 $('cfg-almoco').addEventListener('input',function(){ this.value=this.value.replace(/\D/g,'').slice(0,3); });
 $('fer-add').addEventListener('click',addFeriado);
+$('ab-add').addEventListener('click',addAbono);
 
 /* anexo de comprovante na correção (mini menu: tirar foto OU escolher arquivo) */
 function limparAnexo(){ S.anexo=null; $('anexoCam').value=''; $('anexoFile').value=''; $('anexo-chip').classList.remove('show'); $('btn-anexo').style.display='flex'; }
